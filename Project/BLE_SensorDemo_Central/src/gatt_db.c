@@ -358,7 +358,7 @@ void Master_Connection_CB(uint8_t *connection_evt, uint8_t *status, uint16_t *co
     /* Restart Discovery & Connection procedure */
    gConnectionContext.isBleConnection = FALSE;
     gConnectionContext.isBleConnectionAlarm = FALSE;
-    deviceDiscovery();
+//    deviceDiscovery();
   masterContext.startDeviceDisc = TRUE;
     masterContext.connHandle = 0xFFFF;
     break;
@@ -464,13 +464,8 @@ void responseComplete(void)
 {
   if(masterContext.writeComplete)
   {
-//    for(int i = 0; i < 4000; i++)    //1tick = 0.25usec -> 100tick 25usec -> 4000tick = 1ms 
-//    {
-//      __asm("NOP");
-//    }
     masterContext.writeComplete = FALSE;
-    putchar('3');
-//    UartWrite("3", 1);
+    putchar(OTA_COMMAND_ACK);
   }
 }
 
@@ -481,32 +476,19 @@ void writeMainFwTest(void)
   if(masterContext.mainWriteEnable && !masterContext.writeComplete)
   {
     masterContext.mainWriteEnable = FALSE;
-//    if(gStartTimeFlag)
-//    {
-//      gStartTimeFlag = FALSE;
-//      gStartTime = HAL_VTimerGetCurrentTime_sysT32();
-//      PRINTF("write timer start\r\n");
-//    }
     status = Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, gUpdateBlockSize, gUpdateBlockData); 
     if (status != BLE_STATUS_SUCCESS) {
       PRINTF("Error during the Master_Write_Value() function call returned status=0x%02x\r\n", status);
     }
-//    else
-//    {
+    else
+    {      
+      if(masterContext.updateStart)
+        masterContext.writeComplete = TRUE;
+    }
 //      for(int i = 0; i < 4000; i++)    //1tick = 0.25usec -> 100tick 25usec -> 4000tick = 1ms 
 //      {
 //        __asm("NOP");
 //      }
-//    }
-//    else{
-//      PRINTF("Master_Write_Value() OK\r\n");
-//      PRINTF("[write data] ");
-//      for(int i = 0; i < sizeof(testBuff); i++)
-//      {
-//        PRINTF("%02X ", testBuff[i]);
-//      }
-//      PRINTF("\r\n");
-//    }  
   }
 }
 
@@ -516,8 +498,6 @@ void writeMainFwTest(void)
 * Input          : 
 * Return         : 
 *******************************************************************************/
-uint8_t gRcvData[16] = {0,};
-uint32_t gReadDataCount = 0;
 void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *connection_handle, dataReceivedType *data)
 {
   static int16_t rcvData=0, temp;
@@ -539,6 +519,7 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
             masterContext.mainFlag = FALSE;
             gStartTimeFlag = TRUE;
             gConnectionContext.isBleConnection = TRUE;
+            putchar(OTA_COMMAND_DISCOVERY);
             PRINTF("\r\n****Service Changed indication enabled mainFlag complete\r\n");
          }
          else
@@ -550,27 +531,16 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
     }
     }
     break;
-  case WRITE_VALUE_STATUS:
-    {
-      if(masterContext.updateStart)
-        masterContext.writeComplete = TRUE;
-    }
-    break;
   case NOTIFICATION_DATA_RECEIVED:
     {
       if ((masterContext.mainGetInfoHandle+1) == data->attr_handle)
       {
-        if((data->data_length == 1) && (data->data_value[0] == 0x0A))
+        if((data->data_length == 1) && (data->data_value[0] == OTA_COMMAND_REQUEST_START_UPDATE))
         {
-          if(masterContext.updateStart)
-            masterContext.writeComplete = TRUE;
-          else
-          {
-            masterContext.updateStart = TRUE;
-            UartWrite(data->data_value, data->data_length);
-          }
+          masterContext.updateStart = TRUE;
+          UartWrite(data->data_value, data->data_length);
         }
-        else if((data->data_length == 2) && (data->data_value[0] == 0x0C))
+        else if((data->data_length == 2) && (data->data_value[0] == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE))
           UartWrite(data->data_value, data->data_length);
       }
     }

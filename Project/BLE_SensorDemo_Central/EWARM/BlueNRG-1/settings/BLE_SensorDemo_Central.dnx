@@ -12,15 +12,15 @@
         <ByteLimit>50</ByteLimit>
     </Stack>
     <StLinkDriver>
-        <stlinkserialNo>27130243</stlinkserialNo>
-        <stlinkfoundProbes />
-        <stlinkResetStyle>0</stlinkResetStyle>
-        <stlinkResetStrategy>0</stlinkResetStrategy>
         <CStepIntDis>_ 0</CStepIntDis>
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
+        <stlinkResetStyle>0</stlinkResetStyle>
+        <stlinkResetStrategy>0</stlinkResetStrategy>
+        <stlinkserialNo>27130243</stlinkserialNo>
+        <stlinkfoundProbes />
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>3339470264</Checksum>
+        <Checksum>2530125385</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -38,6 +38,27 @@
     <watch_formats>
         <Fmt0>{W}1:gTestFlag	1	0</Fmt0>
     </watch_formats>
+    <DisassembleMode>
+        <mode>0</mode>
+    </DisassembleMode>
+    <Breakpoints2>
+        <Bp0>_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\src\BlueNRG1_it.c}.80.3" 0 0 1 "" 0 "" 0</Bp0>
+        <Bp1>_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\src\gatt_db.c}.538.9" 0 0 1 "" 0 "" 0</Bp1>
+        <Count>2</Count>
+    </Breakpoints2>
+    <LogFile>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+        <Category>_ 0</Category>
+    </LogFile>
+    <Aliases>
+        <A0>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile.c" ""</A0>
+        <A1>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_events.c" ""</A1>
+        <A2>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_sm.c" ""</A2>
+        <A3>_ "c:\Program Files (x86)\IAR Systems\Embedded Workbench 8.40_1\arm\inc\c\DLib_Product_string.h" ""</A3>
+        <Count>4</Count>
+        <SuppressDialog>0</SuppressDialog>
+    </Aliases>
     <CallStackLog>
         <Enabled>0</Enabled>
     </CallStackLog>
@@ -48,25 +69,4 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
-    <LogFile>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-        <Category>_ 0</Category>
-    </LogFile>
-    <DisassembleMode>
-        <mode>0</mode>
-    </DisassembleMode>
-    <Breakpoints2>
-        <Bp0>_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\..\src\BlueNRG1_it.c}.80.3" 0 0 1 "" 0 "" 0</Bp0>
-        <Bp1>_ 0 "EMUL_CODE" "0x2000005C" 0 0 1 "" 0 "" 0</Bp1>
-        <Count>2</Count>
-    </Breakpoints2>
-    <Aliases>
-        <A0>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile.c" ""</A0>
-        <A1>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_events.c" ""</A1>
-        <A2>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_sm.c" ""</A2>
-        <A3>_ "c:\Program Files (x86)\IAR Systems\Embedded Workbench 8.40_1\arm\inc\c\DLib_Product_string.h" ""</A3>
-        <Count>4</Count>
-        <SuppressDialog>0</SuppressDialog>
-    </Aliases>
 </settings>

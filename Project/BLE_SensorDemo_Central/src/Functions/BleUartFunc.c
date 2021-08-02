@@ -329,6 +329,22 @@ void PcToUartParse(void)
         nRxData[chIndex++] = ch;
         if(!gFwUpdateFlag && ((ch == ASCII_CR) && (nRxData[chIndex-2] == ASCII_LF)))
         {
+          if(nRxData[chIndex-3] == OTA_COMMAND_DISCOVERY)
+          {
+            chIndex = 0;
+            /* Start Master Device Discovery procedure */
+            if(!gConnectionContext.isBleConnection)
+            {
+              if (deviceDiscovery() != BLE_STATUS_SUCCESS) {
+                PRINTF("Error during the device discovery procedure\r\n");
+              }
+            }
+            else
+            {
+              putchar(OTA_COMMAND_NACK);
+            }
+          }
+          else
           {
             chIndex = 0;
             updateStartPacket = (UpdateStartPacket_t*)nRxData;
@@ -336,11 +352,6 @@ void PcToUartParse(void)
             {
               gFwSize = updateStartPacket->fwSize;
               gBlockSize = updateStartPacket->blkTotal;
-//              for(int i = 0; i < sizeof(updateStartPacket); i++)
-//              {
-//                gUpdateBlockData[i] = 0x00;
-//                gUpdateBlockData[i] = nRxData[i];
-//              }
               
               memset(gUpdateBlockData, 0x00, 32);
               memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
@@ -359,26 +370,16 @@ void PcToUartParse(void)
             gUpdateBlockSize = BLE_TX_BUFFER_SIZE;
             
           chIndex = 0;
-//          for(int i = 0; i < BLE_TX_BUFFER_SIZE; i++)
-//          {
-//            gUpdateBlockData[i] = 0x00;
-//            gUpdateBlockData[i] = nRxData[i];
-//          }
           memset(gUpdateBlockData, 0x00, 32);
           memcpy(gUpdateBlockData, nRxData, BLE_TX_BUFFER_SIZE);
 //          gUpdateBlockChecksum = MakeCheckSum(gUpdateBlockData, BLE_TX_BUFFER_SIZE);
           masterContext.mainWriteEnable = TRUE;
 //          DeInitUartQueue();
         }
-        else if(gFwUpdateFlag && ((ch == ASCII_CR) && (nRxData[chIndex-2] == ASCII_LF)) && (nRxData[chIndex-3] == 0x0C))
+        else if(gFwUpdateFlag && ((ch == ASCII_CR) && (nRxData[chIndex-2] == ASCII_LF)) && (nRxData[chIndex-3] == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE))
         {
             chIndex = 0;
             gFwUpdateFlag = FALSE;
-//            for(int i = 0; i < 3; i++)
-//            {
-//              gUpdateBlockData[i] = 0x00;
-//              gUpdateBlockData[i] = nRxData[i];
-//            }
             memset(gUpdateBlockData, 0x00, 32);
             memcpy(gUpdateBlockData, nRxData, 3); 
             gUpdateBlockSize = 3;

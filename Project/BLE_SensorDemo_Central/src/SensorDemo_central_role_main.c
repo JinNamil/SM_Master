@@ -268,28 +268,15 @@ int main(void)
   if (deviceInit() != BLE_STATUS_SUCCESS) {
     PRINTF("Error during the device init procedure\r\n");
   }
-  
-  /* Start Master Device Discovery procedure */
-  if (deviceDiscovery() != BLE_STATUS_SUCCESS) {
-    PRINTF("Error during the device discovery procedure\r\n");
-  }
 
   InitUartQueue();
   PRINTF("Sensor Demo Central application\r\n");
-  SdkEvalLedInit(LED1);
-  SdkEvalLedInit(LED2);
-  SdkEvalLedInit(LED3);
-  SdkEvalLedOn(LED1);
-  SdkEvalLedOn(LED2);
-  SdkEvalLedOn(LED3);
   
   /* Main loop */
   while(1) {
     /* BLE Stack Tick */
     
-//    NVIC_DisableIRQ(UART_IRQn);
     BTLE_StackTick();
-//    NVIC_EnableIRQ(UART_IRQn);
     
     /* Master Tick */
     Master_Process(); 
@@ -315,13 +302,19 @@ int main(void)
       masterContext.enableNotif = FALSE;
     }
     
+    PcToUartParse();
     if(gConnectionContext.isBleConnection)
     {
-      PcToUartParse();
       writeMainFwTest();
       responseComplete();
     }
-
+    
+//    if(UART_GetFlagStatus(UART_IT_OE))
+//    {
+//      SdkEvalComUartInit(UART_BAUDRATE);
+//      SdkEvalComUartIrqConfig(ENABLE);
+//      UartWrite("error", 5);
+//    }
 //    else
 //    {
 //      DiscoveryPeripeheral();

@@ -137,19 +137,6 @@ void GPIO_Handler(void)
 */
 void UART_Handler(void)
 {  
-//  uint8_t data;
-//  
-//  if(UART_GetITStatus(UART_IT_RX) != RESET)
-//  {
-//    while(!UART_GetFlagStatus(UART_FLAG_RXFE))
-//    {
-//      data = (uint8_t) (UART_ReceiveData() & 0xFF);
-//      UartEnQueue((unsigned char)data);
-//    }
-//  }
-//  
-//  if (UART_GetITStatus(UART_IT_TX) != RESET)
-//    UART_ClearITPendingBit(UART_IT_TX);
   SdkEvalComIOUartIrqHandler();
 }
 
