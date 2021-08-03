@@ -17,7 +17,6 @@ extern int putchar(int c);
 extern uint8_t gUpdateBlockData[32];
 //extern uint8_t* gUpdateBlockData;
 uint8_t gUpdateBlockSize;
-//extern uint8_t gUpdateBlockChecksum;
 uint32_t gUpdateTotalSize = 0;
 
 hUARTQUEUE	hUartQueue;
@@ -344,6 +343,14 @@ void PcToUartParse(void)
               putchar(OTA_COMMAND_NACK);
             }
           }
+          else if(nRxData[chIndex-3] == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
+          {
+              chIndex = 0;
+              memset(gUpdateBlockData, 0x00, 32);
+              memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
+              masterContext.mainWriteEnable = TRUE;
+              gUpdateBlockSize = 3;
+          }
           else
           {
             chIndex = 0;
@@ -372,7 +379,6 @@ void PcToUartParse(void)
           chIndex = 0;
           memset(gUpdateBlockData, 0x00, 32);
           memcpy(gUpdateBlockData, nRxData, BLE_TX_BUFFER_SIZE);
-//          gUpdateBlockChecksum = MakeCheckSum(gUpdateBlockData, BLE_TX_BUFFER_SIZE);
           masterContext.mainWriteEnable = TRUE;
 //          DeInitUartQueue();
         }

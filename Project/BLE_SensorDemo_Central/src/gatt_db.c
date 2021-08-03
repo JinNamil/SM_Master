@@ -62,7 +62,6 @@ uint8_t gStopFlag = FALSE;
 uint8_t gUpdateBlockData[32] = {0,};
 //uint8_t* gUpdateBlockData = NULL;
 extern uint8_t gUpdateBlockSize;
-//uint8_t gUpdateBlockChecksum = 0;
 
 /*******************************************************************************
 * Function Name  : deviceInit
@@ -541,7 +540,9 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
           UartWrite(data->data_value, data->data_length);
         }
         else if((data->data_length == 2) && (data->data_value[0] == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE))
-          UartWrite(data->data_value, data->data_length);
+        {
+            UartWrite(data->data_value, data->data_length);
+        }
       }
     }
     break;
