@@ -283,12 +283,6 @@ int main(void)
     
     /* Power Save management */
 //    BlueNRG_Sleep(SLEEPMODE_NOTIMER, 0, 0);
-//      
-    /* Start the connection procedure */
-//    if (masterContext.startDeviceDisc) {
-//      deviceConnection();
-//      masterContext.startDeviceDisc = FALSE;
-//    }
       
     /* Discovery characteristics of service to enable the notifications/indications */
     if (masterContext.findCharacOfService) {
@@ -314,10 +308,6 @@ int main(void)
 //      SdkEvalComUartInit(UART_BAUDRATE);
 //      SdkEvalComUartIrqConfig(ENABLE);
 //      UartWrite("error", 5);
-//    }
-//    else
-//    {
-//      DiscoveryPeripeheral();
 //    }
   }
 }

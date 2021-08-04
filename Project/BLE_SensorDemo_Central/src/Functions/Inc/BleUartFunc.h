@@ -9,11 +9,7 @@
 /* ========> Packet Structure <====================
  [ST][LNE][CMD][MAGIC][Data Packet][ChecSum][End]
   =========================================== */
-#define UART_QUEUE_SIZE									64
-#define UartPrintConst(MSG)							{\
-																						UartTxBlePacket(MSG, eBLE_CMD_DEBUG_MSG);\
-																				}
-#define Q_FALSE													-1
+#define UART_QUEUE_SIZE		        64
 #define OTA_UPDATE_PACKET_BLOCK_SIZE 18
 /*********************************** Typedef Structer ***********************************/
 typedef struct _UartFifoTag
@@ -22,16 +18,6 @@ typedef struct _UartFifoTag
     Fifo_t    			FifoTx;
     Fifo_t    			FifoRx;
 } hUartBuf_t, hUARTQUEUE;
-
-#pragma pack(push, 1)
-typedef struct
-{
-	uint8_t	 cmd;
-	uint8_t  block[OTA_UPDATE_PACKET_BLOCK_SIZE];
-	uint8_t	 verify;
-} BlockPacket_t;
-#pragma pack(pop)
-
 
 #pragma pack(push, 1)
 typedef struct
@@ -46,12 +32,6 @@ typedef struct
 /************************************ Define Functions ************************************/
 void UartWrite(const unsigned char * buffer, size_t size);
 int UartRead(int time_out); 
-int RxPacketParse(unsigned char *pPacket);
-void TxBleStatus(unsigned char nStatus);
-void TxCurrBleMode(unsigned char nMode);
-void UartTxBlePacket(char *msg, unsigned char nCmd);
-void TxBleSensorList(void);
-void UartParse(void);
 void PcToUartParse(void);
 void InitUartQueue(void);
 void UartEnQueue(unsigned char nCmd);

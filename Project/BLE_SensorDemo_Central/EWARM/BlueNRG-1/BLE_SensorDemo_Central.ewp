@@ -1075,9 +1075,6 @@
     <group>
         <name>Function</name>
         <file>
-            <name>$PROJ_DIR$\..\..\src\Functions\AppGeneral.c</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\..\src\Functions\BleUartFunc.c</name>
         </file>
         <file>

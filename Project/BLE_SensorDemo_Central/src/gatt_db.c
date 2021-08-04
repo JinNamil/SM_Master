@@ -40,28 +40,15 @@
 /* Primary Service UUID expected from Sensor demo peripheral */
 uint8_t GENERIC_ACCESS_PROFILE_UUID[]={0x00, 0x18};
 uint8_t GENERIC_ATTRIBUTE_PROFILE_UUID[]={0x01, 0x18};
-uint8_t ACCELERATION_SERVICE_UUID[]={0x1B,0xC5,0xD5,0xA5,0x02,0x00,0xB4,0x9A,0xE1,0x11,0x3A,0xCF,0x80,0x6E,0x36,0x02};
-uint8_t ENVIRONMENTAL_SERVICE_UUID[]={0x1B,0xC5,0xD5,0xA5,0x02,0x00,0xD0,0x82,0xE2,0x11,0x77,0xE4,0x40,0x1A,0x82,0x42};
-
-/* Characteristic UUID expected from Sensor demo peripheral */
-uint8_t FREE_FALL_CHAR_UUID[]={0x1B,0xC5,0xD5,0xA5,0x02,0x00,0xFC,0x8F,0xE1,0x11,0x4A,0xCF,0xA0,0x78,0x3E,0xE2};
-uint8_t ACCELERATION_CHAR_UUID[]={0x1B,0xC5,0xD5,0xA5,0x02,0x00,0x36,0xAC,0xE1,0x11,0x4B,0xCF,0x80,0x1B,0x0A,0x34};
-uint8_t TEMPERATURE_CHAR_UUID[]={0x1B,0xC5,0xD5,0xA5,0x02,0x00,0xE3,0xA9,0xE2,0x11,0x77,0xE4,0x20,0x55,0x2E,0xA3};
 
 /* Service and Characteristic UUID expected from slave peripheral */
 uint8_t MAIN_FIRMWARE_SERVICE_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x00,0x90,0x58,0xDE};
 uint8_t MAIN_FIRMWARE_WRITE_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x01,0x90,0x58,0xDE};
 uint8_t MAIN_FIRMWARE_READ_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x02,0x90,0x58,0xDE};
-uint8_t MAIN_FIRMWARE_DATA_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x04,0x90,0x58,0xDE};
 
 masterRoleContextType masterContext;
 connectionContexts_t gConnectionContext;
-uint32_t gStartTime = 0;
-uint8_t gStartTimeFlag = FALSE;
-uint8_t gStopFlag = FALSE;
 uint8_t gUpdateBlockData[32] = {0,};
-//uint8_t* gUpdateBlockData = NULL;
-extern uint8_t gUpdateBlockSize;
 
 /*******************************************************************************
 * Function Name  : deviceInit
@@ -440,25 +427,6 @@ void enableSensorNotifications(void)
   }
 }
 
-void readMainFwTest(void)
-{
-  uint8_t status;
-
-  if(masterContext.writeComplete)
-  {
-    masterContext.writeComplete = FALSE;
-    status = Master_Read_Value(masterContext.connHandle, masterContext.mainGetInfoHandle+1,
-            &masterContext.mainVal_length, masterContext.mainValue,
-            sizeof(masterContext.mainValue)); 
-    if (status != BLE_STATUS_SUCCESS) {
-      PRINTF("Error during the Master_Read_Value() function call returned status=0x%02x\r\n", status);
-    }
-    else{
-      PRINTF("!!!!!!!!!!!!!!!!!! Master_Read_Value() OK\r\n");
-    }
-  }
-}
-
 void responseComplete(void)
 {
   if(masterContext.writeComplete)
@@ -475,7 +443,7 @@ void writeMainFwTest(void)
   if(masterContext.mainWriteEnable && !masterContext.writeComplete)
   {
     masterContext.mainWriteEnable = FALSE;
-    status = Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, gUpdateBlockSize, gUpdateBlockData); 
+    status = Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, getUpdatePacketSize(), gUpdateBlockData); 
     if (status != BLE_STATUS_SUCCESS) {
       PRINTF("Error during the Master_Write_Value() function call returned status=0x%02x\r\n", status);
     }
@@ -516,7 +484,6 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
          if(masterContext.numCharacMainSer == 0)
          {
             masterContext.mainFlag = FALSE;
-            gStartTimeFlag = TRUE;
             gConnectionContext.isBleConnection = TRUE;
             putchar(OTA_COMMAND_DISCOVERY);
             PRINTF("\r\n****Service Changed indication enabled mainFlag complete\r\n");
