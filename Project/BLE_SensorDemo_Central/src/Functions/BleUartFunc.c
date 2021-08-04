@@ -83,41 +83,43 @@ void PcToUartParse(void)
         ch = FifoPop(&hUartQueue.FifoRx);
         
         nRxData[chIndex++] = ch;
-        if(!getUpdateMode() && ((ch == ASCII_CR) && (nRxData[chIndex-2] == ASCII_LF)))
+        if(!getUpdateMode())
         {
-          cmd = nRxData[chIndex-3];
-          if(cmd == OTA_COMMAND_DISCOVERY)
+          if((ch == ASCII_CR) && (nRxData[chIndex-2] == ASCII_LF))
           {
-            chIndex = 0;
-            if(!gConnectionContext.isBleConnection)
+            cmd = nRxData[chIndex-3];
+            if(cmd == OTA_COMMAND_DISCOVERY)
             {
-              if (deviceDiscovery() != BLE_STATUS_SUCCESS) {
-                PRINTF("Error during the device discovery procedure\r\n");
+              chIndex = 0;
+              if(!gConnectionContext.isBleConnection)
+              {
+                if (deviceDiscovery() != BLE_STATUS_SUCCESS)
+                  putchar(OTA_COMMAND_NACK);
               }
+              else
+                putchar(OTA_COMMAND_ACK);
+            }
+            else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
+            {
+                chIndex = 0;
+                memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
+                masterContext.mainWriteEnable = TRUE;
+                setUpdatePacketSize(3);
             }
             else
-              putchar(OTA_COMMAND_ACK);
-          }
-          else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
-          {
-              chIndex = 0;
-              memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
-              masterContext.mainWriteEnable = TRUE;
-              setUpdatePacketSize(3);
-          }
-          else
-          {
-            chIndex = 0;
-            updateStartPacket = (UpdateStartPacket_t*)nRxData;
-            if(updateStartPacket->cmd == 0x0A)
             {
-              gFwSize = updateStartPacket->fwSize;
-              gBlockSize = updateStartPacket->blkTotal;
-              
-              memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
-              masterContext.mainWriteEnable = TRUE;
-              setUpdatePacketSize(3);
-              setUpdateMode(TRUE);
+              chIndex = 0;
+              updateStartPacket = (UpdateStartPacket_t*)nRxData;
+              if(updateStartPacket->cmd == 0x0A)
+              {
+                gFwSize = updateStartPacket->fwSize;
+                gBlockSize = updateStartPacket->blkTotal;
+                
+                memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
+                masterContext.mainWriteEnable = TRUE;
+                setUpdatePacketSize(3);
+                setUpdateMode(TRUE);
+              }
             }
           }
         }
