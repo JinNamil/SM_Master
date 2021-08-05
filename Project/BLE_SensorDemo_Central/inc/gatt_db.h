@@ -3,9 +3,6 @@
 #define _GATT_DB_H_
 
 
-#define SENSOR_TIMER_NUMBER      1
-
-#define READ_TEMPERATURE_TIMEOUT 3000 // 3 sec.
 #define BLE_TX_BUFFER_SIZE 20
 
 #define OTA_COMMAND_REQUEST_START_UPDATE		0x0A
