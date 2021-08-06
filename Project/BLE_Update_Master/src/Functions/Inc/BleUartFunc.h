@@ -10,8 +10,7 @@
  [ST][LNE][CMD][MAGIC][Data Packet][ChecSum][End]
   =========================================== */
 #define UART_QUEUE_SIZE		        64
-#define OTA_UPDATE_PACKET_BLOCK_SIZE 18
-#define UART_BUFFER_SIZE 100
+#define UART_BUFFER_SIZE 256
 /*********************************** Typedef Structer ***********************************/
 typedef struct _UartFifoTag
 {

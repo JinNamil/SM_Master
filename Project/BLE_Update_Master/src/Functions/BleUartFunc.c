@@ -108,7 +108,6 @@ void PcToUartParse(void)
   uint8_t    cmd = 0;
   uint16_t recvBuffLen = dmaReceiveDataLen();
   UpdateStartPacket_t* updateStartPacket = {0,};
-  
   if(recvBuffLen == 0)
     return;
   else
@@ -121,7 +120,6 @@ void PcToUartParse(void)
         cmd = gBufferUart[recvBuffLen-3];
         if(cmd == OTA_COMMAND_DISCOVERY)
         {
-          recvBuffLen = 0;
           if(!gConnectionContext.isBleConnection)
           {
             if (deviceDiscovery() != BLE_STATUS_SUCCESS)
@@ -132,7 +130,6 @@ void PcToUartParse(void)
         }
         else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
         {
-            recvBuffLen = 0;
             gStartUpdateClock = 0;
             memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
             masterContext.mainWriteEnable = TRUE;
@@ -140,9 +137,9 @@ void PcToUartParse(void)
         }
         else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE)
         {
-          recvBuffLen = 0;
           memset(gUpdateBlockData, 0x00, 32);
           memcpy(gUpdateBlockData, gBufferUart, 3); 
+          memset(gBufferUart, 0x00, sizeof(gBufferUart));
           setUpdatePacketSize(3);
           gUpdateTotalSize = 0;
           masterContext.updateStart = FALSE;
@@ -150,10 +147,10 @@ void PcToUartParse(void)
         }
         else
         {
-          recvBuffLen = 0;
           updateStartPacket = (UpdateStartPacket_t*)gBufferUart;
           if(updateStartPacket->cmd == 0x0A)
           {
+            gStartUpdateClock = Clock_Time();
             gFwSize = updateStartPacket->fwSize;
             gBlockSize = updateStartPacket->blkTotal;
             
@@ -169,14 +166,11 @@ void PcToUartParse(void)
     {
       if(recvBuffLen == BLE_TX_BUFFER_SIZE)
       {
-        recvBuffLen = 0;
         dmaBufferInit();
         gStartUpdateClock = Clock_Time();
         gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
         if(gUpdateTotalSize > gFwSize)
-        {
           setUpdatePacketSize((BLE_TX_BUFFER_SIZE - (gUpdateTotalSize - gFwSize)));
-        }
         else
           setUpdatePacketSize(BLE_TX_BUFFER_SIZE);
         
@@ -187,8 +181,6 @@ void PcToUartParse(void)
         masterContext.mainWriteEnable = TRUE;
       }
     }
-    if(recvBuffLen >= UART_BUFFER_SIZE)
-      recvBuffLen = 0;
   }
   return;
 }
