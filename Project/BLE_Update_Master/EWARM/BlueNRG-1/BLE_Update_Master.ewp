@@ -664,7 +664,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>BLE_SensorDemo_Central.bin</state>
+                    <state>BLE_Update_Master.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -707,7 +707,7 @@
                 <debug>1</debug>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>BLE_SensorDemo_Central.out</state>
+                    <state>BLE_Update_Master.out</state>
                 </option>
                 <option>
                     <name>IlinkLibIOConfig</name>
@@ -1198,6 +1198,9 @@
     <group>
         <name>User</name>
         <file>
+            <name>$PROJ_DIR$\..\..\src\BLE_Update_Master_Main.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\src\BlueNRG1_it.c</name>
         </file>
         <file>
@@ -1205,9 +1208,6 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\Library\BLE_Application\Profile_Central\library\libmaster_library_bluenrg1.a</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\src\SensorDemo_central_role_main.c</name>
         </file>
     </group>
 </project>

@@ -216,6 +216,7 @@ The following binary library is provided on Library\\BLE_Application\Profile_Cen
 #include "master_basic_profile.h"
 #include "master_config.h"
 #include "SensorDemo_config.h"
+#include "BleUartFunc.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -227,9 +228,36 @@ The following binary library is provided on Library\\BLE_Application\Profile_Cen
 #else
 #define PRINTF(...)
 #endif
-
+extern uint8_t gBufferUart[UART_BUFFER_SIZE];
 /* Private variables ---------------------------------------------------------*/
-
+void DMA_Config(void)
+{
+  DMA_InitType DMA_InitStructure;
+  NVIC_InitType NVIC_InitStructure;
+  
+  SysCtrl_PeripheralClockCmd(CLOCK_PERIPH_DMA, ENABLE);
+  
+  DMA_InitStructure.DMA_PeripheralBaseAddr = USART_DR_ADDRESS;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;  
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)gBufferUart;
+  DMA_InitStructure.DMA_BufferSize = (uint32_t)UART_BUFFER_SIZE;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+  DMA_Init(DMA_CH_UART_RX, &DMA_InitStructure);
+  DMA_Cmd(DMA_CH_UART_RX, ENABLE);
+  
+  UART_DMACmd(UART_DMAReq_Rx, ENABLE);
+  
+  NVIC_InitStructure.NVIC_IRQChannel = DMA_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = HIGH_PRIORITY;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);  
+}
 
 /*******************************************************************************
 * Function Name  : main.
@@ -240,6 +268,7 @@ The following binary library is provided on Library\\BLE_Application\Profile_Cen
 *******************************************************************************/
 extern void InitUartQueue(void);
 extern void PcToUartParse(void);
+extern uint32_t gStartUpdateClock;
 int main(void)
 {    
   uint8_t ret;
@@ -252,8 +281,10 @@ int main(void)
    
   /* Configure I/O communication channel */
   SdkEvalComUartInit(UART_BAUDRATE);
-  SdkEvalComUartIrqConfig(ENABLE);
-  
+//  SdkEvalComUartIrqConfig(ENABLE);
+  DMA_Config();
+  Clock_Init();
+  SetBleUpdateTimeout(10);
   /* Configure I/O communication channel  */
 //  SdkEvalComIOConfig(SdkEvalComIOProcessInputData);
   
@@ -268,7 +299,8 @@ int main(void)
   if (deviceInit() != BLE_STATUS_SUCCESS) {
     PRINTF("Error during the device init procedure\r\n");
   }
-
+  
+  ret = SysTick_Config(SYST_CLOCK/2);
   InitUartQueue();
   PRINTF("Sensor Demo Central application\r\n");
   
@@ -303,6 +335,9 @@ int main(void)
       responseComplete();
     }
     
+    if((gStartUpdateClock > 0) && 
+       (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
+      initBleUpdateTimeout();
 //    if(UART_GetFlagStatus(UART_IT_OE))
 //    {
 //      SdkEvalComUartInit(UART_BAUDRATE);

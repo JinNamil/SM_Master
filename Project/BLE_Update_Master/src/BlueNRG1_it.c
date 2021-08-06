@@ -63,7 +63,7 @@ extern LSM6DS3_DrvExtTypeDef *Imu6AxesDrvExt;
 /******************************************************************************/
 /*            Cortex-M0 Processor Exceptions Handlers                         */
 /******************************************************************************/
-
+extern uint32_t gBufferUartLen;
 /**
   * @brief  This function handles NMI exception.
   */
@@ -137,7 +137,8 @@ void GPIO_Handler(void)
 */
 void UART_Handler(void)
 {  
-  SdkEvalComIOUartIrqHandler();
+//  SdkEvalComIOUartIrqHandler();
+    gBufferUartLen++;
 }
 
 void Blue_Handler(void)
@@ -146,6 +147,9 @@ void Blue_Handler(void)
    RAL_Isr();
 }
 
+void DMA_Handler(void)
+{
+}
 /**
   * @}
   */ 

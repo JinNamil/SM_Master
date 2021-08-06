@@ -11,6 +11,7 @@
   =========================================== */
 #define UART_QUEUE_SIZE		        64
 #define OTA_UPDATE_PACKET_BLOCK_SIZE 18
+#define UART_BUFFER_SIZE 100
 /*********************************** Typedef Structer ***********************************/
 typedef struct _UartFifoTag
 {
@@ -37,7 +38,9 @@ void InitUartQueue(void);
 void UartEnQueue(unsigned char nCmd);
 char UartDeQueue(void);
 void DeInitUartQueue(void);
-
+void SetBleUpdateTimeout(unsigned int nTimeOut);
+void getBleUpdateTimeout(void);
+void initBleUpdateTimeout(void);
 
 #endif /* __BLEUARTFUNC_H__ */
 

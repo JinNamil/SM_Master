@@ -26,6 +26,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "bluenrg_x_device.h"
 
+#define DMA_FLAG_TC_UART_RX               DMA_FLAG_TC0
+#define USART_DR_ADDRESS        (UART_BASE)
+#define DMA_CH_UART_RX                  DMA_CH0
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
