@@ -137,18 +137,14 @@ void GPIO_Handler(void)
 */
 void UART_Handler(void)
 {  
-//  SdkEvalComIOUartIrqHandler();
-    gBufferUartLen++;
+  SdkEvalComIOUartIrqHandler();
+//    gBufferUartLen++;
 }
 
 void Blue_Handler(void)
 {
    // Call RAL_Isr
    RAL_Isr();
-}
-
-void DMA_Handler(void)
-{
 }
 /**
   * @}

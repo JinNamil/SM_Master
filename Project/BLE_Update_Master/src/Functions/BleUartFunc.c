@@ -105,90 +105,91 @@ void dmaBufferInit(void)
 
 void PcToUartParse(void)
 {
+  static unsigned char nRxData[MAX_TRX_BUF_SIZE]={0,};
+  static unsigned char chIndex = 0;
+  uint8_t    ch = 0;
   uint8_t    cmd = 0;
-  uint16_t recvBuffLen = dmaReceiveDataLen();
   UpdateStartPacket_t* updateStartPacket = {0,};
-  
-  if(recvBuffLen == 0)
+
+  if ( IsFifoEmpty(&hUartQueue.FifoRx) == true )
     return;
   else
   {
-    if(!getUpdateMode())
-    {
-      if((gBufferUart[recvBuffLen-1] == ASCII_CR) && (gBufferUart[recvBuffLen-2] == ASCII_LF))
-      {
-        dmaBufferInit();
-        cmd = gBufferUart[recvBuffLen-3];
-        if(cmd == OTA_COMMAND_DISCOVERY)
-        {
-          recvBuffLen = 0;
-          if(!gConnectionContext.isBleConnection)
-          {
-            if (deviceDiscovery() != BLE_STATUS_SUCCESS)
-              putchar(OTA_COMMAND_NACK);
-          }
-          else
-            putchar(OTA_COMMAND_ACK);
-        }
-        else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
-        {
-            recvBuffLen = 0;
-            gStartUpdateClock = 0;
-            memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
-            masterContext.mainWriteEnable = TRUE;
-            setUpdatePacketSize(3);
-        }
-        else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE)
-        {
-          recvBuffLen = 0;
-          memset(gUpdateBlockData, 0x00, 32);
-          memcpy(gUpdateBlockData, gBufferUart, 3); 
-          setUpdatePacketSize(3);
-          gUpdateTotalSize = 0;
-          masterContext.updateStart = FALSE;
-          masterContext.mainWriteEnable = TRUE;
-        }
-        else
-        {
-          recvBuffLen = 0;
-          updateStartPacket = (UpdateStartPacket_t*)gBufferUart;
-          if(updateStartPacket->cmd == 0x0A)
-          {
-            gFwSize = updateStartPacket->fwSize;
-            gBlockSize = updateStartPacket->blkTotal;
-            
-            memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
-            masterContext.mainWriteEnable = TRUE;
-            setUpdatePacketSize(3);
-            setUpdateMode(TRUE);
-          }
-        }
-      }
-    }
-    else if(getUpdateMode())
-    {
-      if(recvBuffLen == BLE_TX_BUFFER_SIZE)
-      {
-        recvBuffLen = 0;
-        dmaBufferInit();
-        gStartUpdateClock = Clock_Time();
-        gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
-        if(gUpdateTotalSize > gFwSize)
-        {
-          setUpdatePacketSize((BLE_TX_BUFFER_SIZE - (gUpdateTotalSize - gFwSize)));
-        }
-        else
-          setUpdatePacketSize(BLE_TX_BUFFER_SIZE);
+        ch = FifoPop(&hUartQueue.FifoRx);
         
-        if(gUpdateTotalSize >= gFwSize)
-          setUpdateMode(FALSE);
-          
-        memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);
-        masterContext.mainWriteEnable = TRUE;
-      }
-    }
-    if(recvBuffLen >= UART_BUFFER_SIZE)
-      recvBuffLen = 0;
+        nRxData[chIndex++] = ch;
+        if(!getUpdateMode())
+        {
+          if((ch == ASCII_CR) && (nRxData[chIndex-2] == ASCII_LF))
+          {
+            cmd = nRxData[chIndex-3];
+            if(cmd == OTA_COMMAND_DISCOVERY)
+            {
+              chIndex = 0;
+              if(!gConnectionContext.isBleConnection)
+              {
+                if (deviceDiscovery() != BLE_STATUS_SUCCESS)
+                  putchar(OTA_COMMAND_NACK);
+              }
+              else
+                putchar(OTA_COMMAND_ACK);
+            }
+            else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
+            {
+                chIndex = 0;
+                memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
+                masterContext.mainWriteEnable = TRUE;
+                setUpdatePacketSize(3);
+            }
+            else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE)
+            {
+              chIndex = 0;
+              memset(gUpdateBlockData, 0x00, 32);
+              memcpy(gUpdateBlockData, nRxData, 3); 
+              setUpdatePacketSize(3);
+              gUpdateTotalSize = 0;
+              masterContext.updateStart = FALSE;
+              masterContext.mainWriteEnable = TRUE;
+            }
+            else
+            {
+              chIndex = 0;
+              updateStartPacket = (UpdateStartPacket_t*)nRxData;
+              if(updateStartPacket->cmd == 0x0A)
+              {
+                gFwSize = updateStartPacket->fwSize;
+                gBlockSize = updateStartPacket->blkTotal;
+                
+                memcpy(gUpdateBlockData, nRxData, sizeof(updateStartPacket)); 
+                masterContext.mainWriteEnable = TRUE;
+                setUpdatePacketSize(3);
+                setUpdateMode(TRUE);
+              }
+            }
+          }
+        }
+        else if(getUpdateMode())
+        {
+          if(chIndex == BLE_TX_BUFFER_SIZE)
+          {
+            gUpdateTotalSize += chIndex;
+            if(gUpdateTotalSize > gFwSize)
+            {
+              setUpdatePacketSize((BLE_TX_BUFFER_SIZE - (gUpdateTotalSize - gFwSize)));
+            }
+            else
+              setUpdatePacketSize(BLE_TX_BUFFER_SIZE);
+            
+            if(gUpdateTotalSize >= gFwSize)
+              setUpdateMode(FALSE);
+              
+            chIndex = 0;
+            memcpy(gUpdateBlockData, nRxData, BLE_TX_BUFFER_SIZE);
+            masterContext.mainWriteEnable = TRUE;
+          }
+        }
+        if(chIndex >= MAX_TRX_BUF_SIZE)
+          chIndex = 0;
   }
   return;
 }

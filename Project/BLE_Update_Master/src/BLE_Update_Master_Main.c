@@ -281,8 +281,8 @@ int main(void)
    
   /* Configure I/O communication channel */
   SdkEvalComUartInit(UART_BAUDRATE);
-//  SdkEvalComUartIrqConfig(ENABLE);
-  DMA_Config();
+  SdkEvalComUartIrqConfig(ENABLE);
+//  DMA_Config();
   Clock_Init();
   SetBleUpdateTimeout(10);
   /* Configure I/O communication channel  */
