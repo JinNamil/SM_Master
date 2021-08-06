@@ -30,11 +30,11 @@ uint16_t        gBlockSize = 0;
 
 void UartWrite(const unsigned char * buffer, size_t size)
 {   
-	while(size--)
-	{
-		putchar(*buffer++);
-	}
-	return;
+  while(size--)
+  {
+    putchar(*buffer++);
+  }
+  return;
 }
 
 int UartRead(int time_out) 
@@ -43,9 +43,9 @@ int UartRead(int time_out)
   {	
     while(!UART_GetFlagStatus(UART_FLAG_RXFE)) 
     {
-        unsigned char chv =(unsigned char) (UART_ReceiveData() & 0xFF);
-        UartEnQueue(chv);
-     }
+      unsigned char chv =(unsigned char) (UART_ReceiveData() & 0xFF);
+      UartEnQueue(chv);
+    }
     return TRUE;
   }
   return FALSE;
@@ -73,13 +73,13 @@ uint8_t getUpdatePacketSize(void)
 
 void SetBleUpdateTimeout(unsigned int nTimeOut)
 {
-	gTimeoutUpdateClock = nTimeOut;/*(unsigned int)(nTimeOut * 1000);*/
-	return;
+  gTimeoutUpdateClock = nTimeOut;/*(unsigned int)(nTimeOut * 1000);*/
+  return;
 }
 
 unsigned int GetBleUpdateTimeout(void)
 {
-	return gTimeoutUpdateClock;
+  return gTimeoutUpdateClock;
 }
 
 void initBleUpdateTimeout(void)
@@ -91,12 +91,24 @@ void initBleUpdateTimeout(void)
   setUpdateMode(FALSE);
 }
 
+uint16_t dmaReceiveDataLen(void)
+{
+  return (UART_BUFFER_SIZE - DMA_GetCurrDataCounter(DMA_CH_UART_RX));
+}
+
+void dmaBufferInit(void)
+{
+  DMA_CH_UART_RX->CCR_b.EN = RESET;
+  DMA_SetCurrDataCounter(DMA_CH_UART_RX, UART_BUFFER_SIZE);
+  DMA_CH_UART_RX->CCR_b.EN = SET;
+}
+
 void PcToUartParse(void)
 {
   uint8_t    cmd = 0;
-  uint16_t recvBuffLen = 0;
+  uint16_t recvBuffLen = dmaReceiveDataLen();
   UpdateStartPacket_t* updateStartPacket = {0,};
-  recvBuffLen = (UART_BUFFER_SIZE - DMA_GetCurrDataCounter(DMA_CH_UART_RX));
+  
   if(recvBuffLen == 0)
     return;
   else
@@ -105,9 +117,7 @@ void PcToUartParse(void)
     {
       if((gBufferUart[recvBuffLen-1] == ASCII_CR) && (gBufferUart[recvBuffLen-2] == ASCII_LF))
       {
-        DMA_CH_UART_RX->CCR_b.EN = RESET;
-        DMA_SetCurrDataCounter(DMA_CH_UART_RX, UART_BUFFER_SIZE);
-        DMA_CH_UART_RX->CCR_b.EN = SET;
+        dmaBufferInit();
         cmd = gBufferUart[recvBuffLen-3];
         if(cmd == OTA_COMMAND_DISCOVERY)
         {
@@ -159,9 +169,8 @@ void PcToUartParse(void)
     {
       if(recvBuffLen == BLE_TX_BUFFER_SIZE)
       {
-        DMA_CH_UART_RX->CCR_b.EN = RESET;
-        DMA_SetCurrDataCounter(DMA_CH_UART_RX, UART_BUFFER_SIZE);
-        DMA_CH_UART_RX->CCR_b.EN = SET;
+        recvBuffLen = 0;
+        dmaBufferInit();
         gStartUpdateClock = Clock_Time();
         gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
         if(gUpdateTotalSize > gFwSize)
@@ -174,7 +183,6 @@ void PcToUartParse(void)
         if(gUpdateTotalSize >= gFwSize)
           setUpdateMode(FALSE);
           
-        recvBuffLen = 0;
         memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);
         masterContext.mainWriteEnable = TRUE;
       }
@@ -211,7 +219,7 @@ char UartDeQueue(void)
 
 void DeInitUartQueue(void)
 {
-	FifoFlush(&hUartQueue.FifoRx);
-	memset(g_UartQueue, 0L, UART_QUEUE_SIZE);
+  FifoFlush(&hUartQueue.FifoRx);
+  memset(g_UartQueue, 0L, UART_QUEUE_SIZE);
   return;
 }
