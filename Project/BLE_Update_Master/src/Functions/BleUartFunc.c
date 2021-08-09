@@ -15,6 +15,7 @@
 extern int putchar(int c);
 extern uint8_t gUpdateBlockData[32];
 uint8_t gUpdateBlockSize;
+uint8_t gUpdateBlockRestored;
 uint32_t gUpdateTotalSize = 0;
 uint32_t gStartUpdateClock = 0;
 uint32_t gTimeoutUpdateClock = 0;
@@ -169,6 +170,7 @@ void PcToUartParse(void)
         dmaBufferInit();
         gStartUpdateClock = Clock_Time();
         gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
+        
         if(gUpdateTotalSize > gFwSize)
           setUpdatePacketSize((BLE_TX_BUFFER_SIZE - (gUpdateTotalSize - gFwSize)));
         else
@@ -176,7 +178,7 @@ void PcToUartParse(void)
         
         if(gUpdateTotalSize >= gFwSize)
           setUpdateMode(FALSE);
-          
+        
         memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);
         masterContext.mainWriteEnable = TRUE;
       }

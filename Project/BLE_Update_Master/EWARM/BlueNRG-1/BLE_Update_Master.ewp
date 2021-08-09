@@ -385,7 +385,7 @@
                 <option>
                     <name>CCOptStrategy</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
@@ -448,7 +448,7 @@
                 <option>
                     <name>CCOptStrategySlave</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCGuardCalls</name>
@@ -831,7 +831,7 @@
                 </option>
                 <option>
                     <name>IlinkAdditionalLibs</name>
-                    <state>C:\Users\JinNamil\ST\BlueNRG-1_2 DK 3.2.1\Library\BLE_Application\Profile_Central\library\libmaster_library_bluenrg1.a</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>IlinkOverrideProgramEntryLabel</name>

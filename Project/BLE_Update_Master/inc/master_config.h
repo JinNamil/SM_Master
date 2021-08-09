@@ -111,7 +111,7 @@
  * This time is 200 ms.
  * The expression is Timeout = N x 10 ms
  */
-#define SUPERVISION_TIMEOUT 300
+#define SUPERVISION_TIMEOUT 600
 
 
 #endif /*__MASTER_CONFIG_H */

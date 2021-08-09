@@ -253,10 +253,10 @@ void DMA_Config(void)
   
   UART_DMACmd(UART_DMAReq_Rx, ENABLE);
   
-  NVIC_InitStructure.NVIC_IRQChannel = DMA_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = HIGH_PRIORITY;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);  
+//  NVIC_InitStructure.NVIC_IRQChannel = DMA_IRQn;
+//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = HIGH_PRIORITY;
+//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//  NVIC_Init(&NVIC_InitStructure);  
 }
 
 /*******************************************************************************
@@ -266,7 +266,7 @@ void DMA_Config(void)
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
-extern void InitUartQueue(void);
+
 extern void PcToUartParse(void);
 extern uint32_t gStartUpdateClock;
 int main(void)
@@ -282,11 +282,10 @@ int main(void)
   /* Configure I/O communication channel */
   SdkEvalComUartInit(UART_BAUDRATE);
 //  SdkEvalComUartIrqConfig(ENABLE);
+  
   DMA_Config();
   Clock_Init();
   SetBleUpdateTimeout(10);
-  /* Configure I/O communication channel  */
-//  SdkEvalComIOConfig(SdkEvalComIOProcessInputData);
   
   /* BlueNRG-1 stack init */
   ret = BlueNRG_Stack_Initialization(&BlueNRG_Stack_Init_params);
@@ -300,14 +299,10 @@ int main(void)
     PRINTF("Error during the device init procedure\r\n");
   }
   
-  ret = SysTick_Config(SYST_CLOCK/2);
-  InitUartQueue();
-  PRINTF("Sensor Demo Central application\r\n");
-  
+  ret = SysTick_Config(SYST_CLOCK);
   /* Main loop */
   while(1) {
     /* BLE Stack Tick */
-    
     BTLE_StackTick();
     
     /* Master Tick */
@@ -338,13 +333,14 @@ int main(void)
     if((gStartUpdateClock > 0) && 
        (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
       initBleUpdateTimeout();
-//    if(UART_GetFlagStatus(UART_IT_OE))
-//    {
-//      SdkEvalComUartInit(UART_BAUDRATE);
-//      SdkEvalComUartIrqConfig(ENABLE);
-//      UartWrite("error", 5);
-//    }
+    
+    if(DMA_CH_UART_RX->CCR_b.EN == RESET)
+    {
+//      DMA_Config();
+      putchar('e');
+    }
   }
+  
 }
 
 /* Hardware Error event. 

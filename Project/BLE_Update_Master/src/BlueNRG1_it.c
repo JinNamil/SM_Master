@@ -77,6 +77,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* Go to infinite loop when Hard Fault exception occurs */
+  putchar('e');
   while (1)
   {}
 }
@@ -106,23 +107,6 @@ void SysTick_Handler(void)
 
 void GPIO_Handler(void)
 {
-//#ifndef SENSOR_EMULATION
-//  uint8_t free_fall_status; 
-//  /* Check if GPIO pin 12 interrupt event occured */
-//  if(GPIO_GetITPendingBit(LSM6DS3_IRQ_PIN) == SET) 
-//  {
-//    /* Clear the IRQ pending bit */
-//    GPIO_ClearITPendingBit(LSM6DS3_IRQ_PIN);
-//    
-//    /* Set the IRQ flag */
-//    Imu6AxesDrvExt->Get_Status_Free_Fall_Detection(&free_fall_status);
-//    if (free_fall_status == 1)
-//    {
-//      request_free_fall_notify = TRUE;
-//    }
-//
-//  }  
-//#endif 
 }
 /******************************************************************************/
 /*                 BlueNRG-1 Peripherals Interrupt Handlers                   */
@@ -138,7 +122,7 @@ void GPIO_Handler(void)
 void UART_Handler(void)
 {  
 //  SdkEvalComIOUartIrqHandler();
-    gBufferUartLen++;
+//    gBufferUartLen++;
 }
 
 void Blue_Handler(void)

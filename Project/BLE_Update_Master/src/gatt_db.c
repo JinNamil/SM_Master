@@ -24,6 +24,7 @@
 #include "master_config.h"
 #include "gatt_db.h"
 #include "BleUartFunc.h"
+#include "BlueNRG1_it.h"
 
 #define BLE_MAC_ADDR_LEN								6
 #ifndef DEBUG
@@ -443,6 +444,8 @@ void writeMainFwTest(void)
   if(masterContext.mainWriteEnable && !masterContext.writeComplete)
   {
     masterContext.mainWriteEnable = FALSE;
+    
+//    DMA_CH_UART_RX->CCR_b.EN = RESET;
     status = Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, getUpdatePacketSize(), gUpdateBlockData); 
     if (status != BLE_STATUS_SUCCESS) {
       PRINTF("Error during the Master_Write_Value() function call returned status=0x%02x\r\n", status);
@@ -452,10 +455,11 @@ void writeMainFwTest(void)
       if(masterContext.updateStart)
         masterContext.writeComplete = TRUE;
     }
-//      for(int i = 0; i < 4000; i++)    //1tick = 0.25usec -> 100tick 25usec -> 4000tick = 1ms 
-//      {
-//        __asm("NOP");
-//      }
+//    DMA_CH_UART_RX->CCR_b.EN = SET;
+//    for(int i = 0; i < 4000; i++)    //1tick = 0.25usec -> 100tick 25usec -> 4000tick = 1ms 
+//    {
+//      __asm("NOP");
+//    }
   }
 }
 
