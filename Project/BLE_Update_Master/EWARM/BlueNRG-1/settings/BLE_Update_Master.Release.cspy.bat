@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Project\local\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.general.xcl" --backend -f "C:\Project\local\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Project\git\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.general.xcl" --backend -f "C:\Project\git\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Project\local\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.general.xcl" "--debug_file=%~1" --backend -f "C:\Project\local\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Project\git\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.general.xcl" "--debug_file=%~1" --backend -f "C:\Project\git\BLE_Update_Master\Project\BLE_Update_Master\EWARM\BlueNRG-1\settings\BLE_Update_Master.Release.driver.xcl" 
 
 @echo off 
 :end
