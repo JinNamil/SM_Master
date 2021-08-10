@@ -12,18 +12,6 @@
 #define ASCII_CR												0x0A
 #define ASCII_LF												0x0D
 /*********************************** Typedef Structer ***********************************/
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-#if DEBUG
-#define PRINTF(...) printf(__VA_ARGS__)
-#else
-#define PRINTF(...)
-#endif
-
-#define TRUE				1
-#define FALSE				0
 
 
 /************************************ Define Functions ************************************/

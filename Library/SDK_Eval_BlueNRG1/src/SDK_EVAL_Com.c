@@ -137,12 +137,12 @@ static void SdkEvalUart_Send_Data(uint8_t tx_data)
 
 void SdkEvalComUartInit(uint32_t baudrate)
 {
-  UART_InitType UART_InitStructure;
+  UART_InitType UART_InitStructure = {0,};
   
   /* GPIO Periph clock enable */
   SysCtrl_PeripheralClockCmd(CLOCK_PERIPH_UART | CLOCK_PERIPH_GPIO, ENABLE);
   
-  GPIO_InitType GPIO_InitStructure;
+  GPIO_InitType GPIO_InitStructure = {0,};
   
   /* Configure GPIO_Pin_8 and GPIO_Pin_11 as UART_TXD and UART_RXD*/
   GPIO_InitStructure.GPIO_Pin = SDK_EVAL_UART_TX_PIN;
@@ -192,7 +192,7 @@ void SdkEvalComUartInit(uint32_t baudrate)
 void SdkEvalComUartIrqConfig(FunctionalState EnableIrq)
 {
   /* NVIC configuration */
-  NVIC_InitType NVIC_InitStructure;
+  NVIC_InitType NVIC_InitStructure = {0,};
   
   /* Enable the UART Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = UART_IRQn;

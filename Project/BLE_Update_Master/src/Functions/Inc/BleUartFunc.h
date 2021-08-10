@@ -10,7 +10,7 @@
  [ST][LNE][CMD][MAGIC][Data Packet][ChecSum][End]
   =========================================== */
 #define UART_QUEUE_SIZE		        64
-#define UART_BUFFER_SIZE 256
+#define UART_BUFFER_SIZE 32
 /*********************************** Typedef Structer ***********************************/
 typedef struct _UartFifoTag
 {
@@ -29,6 +29,18 @@ typedef struct
 	uint8_t		lf;
 } UpdateStartPacket_t;
 #pragma pack(pop)
+
+typedef enum
+{
+        STATUS_PC_REQUEST_COMMAND_WAIT = 0,
+        STATUS_PC_REQUEST_COMMAND_RECV,
+        STATUS_PC_REQUEST_DATA_WAIT,
+        STATUS_PC_REQUEST_DATA_RECV,
+        STATUS_BLE_SEND_DATA_COMPLETE,
+        STATUS_PC_REQUEST_BANK_SWAP_RECV,
+        STATUS_PC_REQUEST_BANK_SWAP_COMPLETE,
+        STATUS_BLE_SEND_COMMAND_COMPLETE,
+}bleStatus_t;
 /************************************ Define Functions ************************************/
 void UartWrite(const unsigned char * buffer, size_t size);
 int UartRead(int time_out); 
@@ -40,7 +52,8 @@ void DeInitUartQueue(void);
 void SetBleUpdateTimeout(unsigned int nTimeOut);
 void getBleUpdateTimeout(void);
 void initBleUpdateTimeout(void);
-
+void SetBleStatus(uint32_t status);
+uint32_t GetBleStatus(void);
 #endif /* __BLEUARTFUNC_H__ */
 
 

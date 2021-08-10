@@ -30,13 +30,9 @@ typedef struct masterRoleContextS {
   uint8_t characMainSer[100];
   uint16_t mainHandle;
   uint16_t mainGetInfoHandle;
-  uint8_t mainWriteEnable;
   uint16_t mainVal_length;
   uint8_t mainValue[2];
   uint8_t enableNotif;
-  uint8_t writeComplete;
-  uint8_t updateStart;
-  uint8_t updateCrcStart;
 } masterRoleContextType;
 
 typedef struct connectionContexts{
@@ -55,7 +51,7 @@ void findCharcOfService(void);
 void enableSensorNotifications(void);
 void readTemperature(void);
 void readMainFwTest(void);
-void writeMainFwTest(void);
-void responseComplete(void);
+void bleWriteTask(void);
+void pcResponseTask(void);
 
 #endif /* _GATT_DB_H_ */

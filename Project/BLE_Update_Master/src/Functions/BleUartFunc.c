@@ -11,13 +11,15 @@
 #include "BleUartFunc.h"
 #include "Common.h"
 #include "Fifo.h"
+#include "clock.h"
 
 extern int putchar(int c);
-extern uint8_t gUpdateBlockData[32];
+extern uint8_t gUpdateBlockData[64];
 uint8_t gUpdateBlockSize;
 uint32_t gUpdateTotalSize = 0;
 uint32_t gStartUpdateClock = 0;
 uint32_t gTimeoutUpdateClock = 0;
+uint32_t gStatus = 0;
 uint8_t gBufferUart[UART_BUFFER_SIZE] = {0,};
 uint32_t gBufferUartLen = 0;
 
@@ -82,13 +84,23 @@ unsigned int GetBleUpdateTimeout(void)
   return gTimeoutUpdateClock;
 }
 
+void SetBleStatus(uint32_t status)
+{
+  gStatus = status;
+  return;
+}
+
+uint32_t GetBleStatus(void)
+{
+  return gStatus;
+}
+
 void initBleUpdateTimeout(void)
 {  
-  masterContext.updateStart = FALSE;
-  masterContext.mainWriteEnable = FALSE;
+  SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
+  setUpdateMode(FALSE);
   gUpdateTotalSize = 0;
   gStartUpdateClock = 0;
-  setUpdateMode(FALSE);
 }
 
 uint16_t dmaReceiveDataLen(void)
@@ -132,31 +144,30 @@ void PcToUartParse(void)
         {
             gStartUpdateClock = 0;
             memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
-            masterContext.mainWriteEnable = TRUE;
+            SetBleStatus(STATUS_PC_REQUEST_BANK_SWAP_RECV);
             setUpdatePacketSize(3);
         }
-        else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE)
+        else if(cmd == OTA_COMMAND_COMPLETE_UPDATE)
         {
-          memset(gUpdateBlockData, 0x00, 32);
+          memset(gUpdateBlockData, 0x00, 64);
           memcpy(gUpdateBlockData, gBufferUart, 3); 
           memset(gBufferUart, 0x00, sizeof(gBufferUart));
           setUpdatePacketSize(3);
-          gUpdateTotalSize = 0;
-          masterContext.updateStart = FALSE;
-          masterContext.mainWriteEnable = TRUE;
+          gUpdateTotalSize = 0; 
+          SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
         }
         else
         {
           updateStartPacket = (UpdateStartPacket_t*)gBufferUart;
-          if(updateStartPacket->cmd == 0x0A)
+          if(updateStartPacket->cmd == OTA_COMMAND_START_UPDATE)
           {
             gStartUpdateClock = Clock_Time();
             gFwSize = updateStartPacket->fwSize;
             gBlockSize = updateStartPacket->blkTotal;
             
             memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
-            masterContext.mainWriteEnable = TRUE;
             setUpdatePacketSize(3);
+            SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
             setUpdateMode(TRUE);
           }
         }
@@ -166,6 +177,7 @@ void PcToUartParse(void)
     {
       if(recvBuffLen == BLE_TX_BUFFER_SIZE)
       {
+        SetBleStatus(STATUS_PC_REQUEST_DATA_RECV);
         dmaBufferInit();
         gStartUpdateClock = Clock_Time();
         gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
@@ -179,8 +191,9 @@ void PcToUartParse(void)
           setUpdateMode(FALSE);
         
         memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);
-        masterContext.mainWriteEnable = TRUE;
       }
+      else if(recvBuffLen > BLE_TX_BUFFER_SIZE)
+        initBleUpdateTimeout();
     }
   }
   return;

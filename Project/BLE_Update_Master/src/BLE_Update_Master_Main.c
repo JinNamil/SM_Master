@@ -217,6 +217,7 @@ The following binary library is provided on Library\\BLE_Application\Profile_Cen
 #include "master_config.h"
 #include "SensorDemo_config.h"
 #include "BleUartFunc.h"
+#include "clock.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -232,8 +233,8 @@ extern uint8_t gBufferUart[UART_BUFFER_SIZE];
 /* Private variables ---------------------------------------------------------*/
 void DMA_Config(void)
 {
-  DMA_InitType DMA_InitStructure;
-  NVIC_InitType NVIC_InitStructure;
+  DMA_InitType DMA_InitStructure = {0,};
+//  NVIC_InitType NVIC_InitStructure;
   
   SysCtrl_PeripheralClockCmd(CLOCK_PERIPH_DMA, ENABLE);
   
@@ -268,6 +269,7 @@ void DMA_Config(void)
 *******************************************************************************/
 
 extern void PcToUartParse(void);
+extern unsigned int GetBleUpdateTimeout(void);
 extern uint32_t gStartUpdateClock;
 int main(void)
 {    
@@ -284,61 +286,61 @@ int main(void)
 //  SdkEvalComUartIrqConfig(ENABLE);
   
   DMA_Config();
-  Clock_Init();
+//  Clock_Init();
   SetBleUpdateTimeout(10);
+  SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
   
   /* BlueNRG-1 stack init */
   ret = BlueNRG_Stack_Initialization(&BlueNRG_Stack_Init_params);
   if (ret != BLE_STATUS_SUCCESS) {
-    PRINTF("Error in BlueNRG_Stack_Initialization() 0x%02x\r\n", ret);
+    ;
     while(1);
   }
      
   /* Master Init procedure */
   if (deviceInit() != BLE_STATUS_SUCCESS) {
-    PRINTF("Error during the device init procedure\r\n");
+    ;
   }
   
-  ret = SysTick_Config(SYST_CLOCK);
+  SysTick_Config(SYST_CLOCK);
   /* Main loop */
   while(1) {
     /* BLE Stack Tick */
+    
     BTLE_StackTick();
     
     /* Master Tick */
     Master_Process(); 
     
-    /* Power Save management */
-//    BlueNRG_Sleep(SLEEPMODE_NOTIMER, 0, 0);
-      
-    /* Discovery characteristics of service to enable the notifications/indications */
-    if (masterContext.findCharacOfService) {
-      findCharcOfService();
-      masterContext.findCharacOfService = FALSE;
-    }
+    if((GetBleStatus() == STATUS_PC_REQUEST_COMMAND_WAIT) 
+       || (GetBleStatus() == STATUS_PC_REQUEST_DATA_WAIT))
+      PcToUartParse();
     
-    /* Enable the notifications/indications */
-    if (masterContext.enableNotif) {
-      enableSensorNotifications();
-      masterContext.enableNotif = FALSE;
-    }
-    
-    PcToUartParse();
     if(gConnectionContext.isBleConnection)
     {
-      writeMainFwTest();
-      responseComplete();
+      bleWriteTask();
+//      pcResponseTask();
+    }
+    else
+    {
+      if (masterContext.findCharacOfService)
+      {
+        findCharcOfService();
+        masterContext.findCharacOfService = FALSE;
+      }
+      
+      /* Enable the notifications/indications */
+      if (masterContext.enableNotif)
+      {
+        enableSensorNotifications();
+        masterContext.enableNotif = FALSE;
+      }
     }
     
     if((gStartUpdateClock > 0) && 
        (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
       initBleUpdateTimeout();
     
-//    if(DMA_CH_UART_RX->CCR_b.EN == RESET)
-//    {
-////      DMA_Config();
-//      putchar('e');
-//    }
   }
   
 }

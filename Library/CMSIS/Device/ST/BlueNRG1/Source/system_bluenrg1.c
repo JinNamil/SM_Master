@@ -965,7 +965,7 @@ void SystemInit(void)
   NVIC_SetPriority(NVM_IRQn,       LOW_PRIORITY);
   NVIC_SetPriority(UART_IRQn,      LOW_PRIORITY);
   NVIC_SetPriority(SPI_IRQn,       LOW_PRIORITY);
-  NVIC_SetPriority(BLUE_CTRL_IRQn, CRITICAL_PRIORITY);
+  NVIC_SetPriority(BLUE_CTRL_IRQn, MED_PRIORITY);
   NVIC_SetPriority(WDG_IRQn,       LOW_PRIORITY);
   NVIC_SetPriority(ADC_IRQn,       LOW_PRIORITY);
   NVIC_SetPriority(I2C2_IRQn,      LOW_PRIORITY);
@@ -976,7 +976,7 @@ void SystemInit(void)
   NVIC_SetPriority(MFT2B_IRQn,    LOW_PRIORITY);
   NVIC_SetPriority(RTC_IRQn,       LOW_PRIORITY);
   NVIC_SetPriority(PKA_IRQn,       LOW_PRIORITY);
-  NVIC_SetPriority(DMA_IRQn,       LOW_PRIORITY);
+  NVIC_SetPriority(DMA_IRQn,       HIGH_PRIORITY);
 
   /* Device Configuration */
   DeviceConfiguration(TRUE, TRUE);

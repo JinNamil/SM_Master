@@ -47,9 +47,10 @@ uint8_t MAIN_FIRMWARE_SERVICE_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0
 uint8_t MAIN_FIRMWARE_WRITE_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x01,0x90,0x58,0xDE};
 uint8_t MAIN_FIRMWARE_READ_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x02,0x90,0x58,0xDE};
 
+extern uint8_t getUpdatePacketSize(void);
 masterRoleContextType masterContext;
 connectionContexts_t gConnectionContext;
-uint8_t gUpdateBlockData[32] = {0,};
+uint8_t gUpdateBlockData[64] = {0,};
 
 /*******************************************************************************
 * Function Name  : deviceInit
@@ -69,10 +70,6 @@ uint8_t deviceInit(void)
   masterContext.findCharacOfService = FALSE;
   masterContext.genAttFlag = FALSE;
   masterContext.mainFlag = FALSE;
-  masterContext.mainWriteEnable = FALSE;
-  masterContext.writeComplete = FALSE;
-  masterContext.updateStart = FALSE;
-  masterContext.updateCrcStart = FALSE;
   masterContext.enableNotif = FALSE;
   gConnectionContext.isBleConnection = FALSE;
   gConnectionContext.isBleConnectionAlarm = FALSE;
@@ -228,7 +225,7 @@ void findCharcOfService(void)
   				  numCharac, charac, max_size);
 
   if (ret != BLE_STATUS_SUCCESS) {
-    PRINTF("Master_GetCharacOfService() failed with status 0x%02x\r\n", ret);
+    ;
   }
 }
 
@@ -405,14 +402,13 @@ void enableSensorNotifications(void)
 {
   uint8_t ret;
   uint16_t handle;
-  uint8_t result = -1;
 
   /* Enable Service changed notification */
   if (masterContext.genAttFlag) {
     memcpy ((uint8_t*)&handle, &masterContext.characGenAttSer[4], 2);
     ret = Master_NotifIndic_Status(masterContext.connHandle, (handle+2), FALSE, TRUE);
     if (ret != BLE_STATUS_SUCCESS)
-      PRINTF("Error during the Master_NotifIndic_Status(), Status 0x%02x\r\n", ret);
+      ;
   }
 
   if(masterContext.mainFlag)
@@ -424,42 +420,55 @@ void enableSensorNotifications(void)
     
    ret = Master_NotifIndic_Status(masterContext.connHandle, handle, TRUE, FALSE);
    if(ret != BLE_STATUS_SUCCESS)
-      PRINTF("Error during the Master_NotifIndic_Status()-main, Status 0x%02x\r\n", ret);
+      ;
   }
 }
 
-void responseComplete(void)
+void pcResponseTask(void)
 {
-  if(masterContext.writeComplete)
+  if(GetBleStatus() == STATUS_BLE_SEND_DATA_COMPLETE)
   {
-    masterContext.writeComplete = FALSE;
+    DMA_CH_UART_RX->CCR_b.EN = RESET;
     putchar(OTA_COMMAND_ACK);
+    SetBleStatus(STATUS_PC_REQUEST_DATA_WAIT);
+    DMA_CH_UART_RX->CCR_b.EN = SET;
+  }
+  else if(GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_COMPLETE)
+  {
+    DMA_CH_UART_RX->CCR_b.EN = RESET;
+    putchar(OTA_COMMAND_ACK);
+    SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
+    DMA_CH_UART_RX->CCR_b.EN = SET;
   }
 }
 
-void writeMainFwTest(void)
+void bleWriteTask(void)
 {
-  uint8_t status, errcode;
-  
-  if(masterContext.mainWriteEnable && !masterContext.writeComplete)
+  if((GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV) || (GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV) 
+     || (GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV))
   {
-    masterContext.mainWriteEnable = FALSE;
-    
-//    DMA_CH_UART_RX->CCR_b.EN = RESET;
-    status = Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, getUpdatePacketSize(), gUpdateBlockData); 
-    if (status != BLE_STATUS_SUCCESS) {
-      PRINTF("Error during the Master_Write_Value() function call returned status=0x%02x\r\n", status);
-    }
+    DMA_CH_UART_RX->CCR_b.EN = RESET;
+    if (Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, getUpdatePacketSize(), gUpdateBlockData) 
+        != BLE_STATUS_SUCCESS)
+      ;
     else
     {      
-      if(masterContext.updateStart)
-        masterContext.writeComplete = TRUE;
+      if(GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV)
+      {
+        putchar(OTA_COMMAND_ACK);
+        SetBleStatus(STATUS_PC_REQUEST_DATA_WAIT);
+//        SetBleStatus(STATUS_BLE_SEND_DATA_COMPLETE);
+      }
+      else if(GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV)
+        SetBleStatus(STATUS_BLE_SEND_COMMAND_COMPLETE);
+      else if(GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV)
+      {        
+        putchar(OTA_COMMAND_ACK);
+        SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
+//        SetBleStatus(STATUS_PC_REQUEST_BANK_SWAP_COMPLETE);
+      }
     }
-//    DMA_CH_UART_RX->CCR_b.EN = SET;
-//    for(int i = 0; i < 4000; i++)    //1tick = 0.25usec -> 100tick 25usec -> 4000tick = 1ms 
-//    {
-//      __asm("NOP");
-//    }
+    DMA_CH_UART_RX->CCR_b.EN = SET;
   }
 }
 
@@ -471,10 +480,6 @@ void writeMainFwTest(void)
 *******************************************************************************/
 void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *connection_handle, dataReceivedType *data)
 {
-  static int16_t rcvData=0, temp;
-  uint8_t i;
-  uint32_t stopTime = 0;
-
   switch(*procedure) {
   case NOTIFICATION_INDICATION_CHANGE_STATUS:
     {
@@ -507,12 +512,13 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
       {
         if((data->data_length == 1) && (data->data_value[0] == OTA_COMMAND_START_UPDATE))
         {
-          masterContext.updateStart = TRUE;
           UartWrite(data->data_value, data->data_length);
+          SetBleStatus(STATUS_PC_REQUEST_DATA_WAIT);
         }
-        else if((data->data_length == 2) && (data->data_value[0] == OTA_COMMAND_RESPONSE_COMPLETE_UPDATE))
+        else if((data->data_length == 2) && (data->data_value[0] == OTA_COMMAND_COMPLETE_UPDATE))
         {
             UartWrite(data->data_value, data->data_length);
+            SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
         }
       }
     }
