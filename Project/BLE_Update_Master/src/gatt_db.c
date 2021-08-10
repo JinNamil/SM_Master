@@ -505,7 +505,7 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
     {
       if ((masterContext.mainGetInfoHandle+1) == data->attr_handle)
       {
-        if((data->data_length == 1) && (data->data_value[0] == OTA_COMMAND_REQUEST_START_UPDATE))
+        if((data->data_length == 1) && (data->data_value[0] == OTA_COMMAND_START_UPDATE))
         {
           masterContext.updateStart = TRUE;
           UartWrite(data->data_value, data->data_length);

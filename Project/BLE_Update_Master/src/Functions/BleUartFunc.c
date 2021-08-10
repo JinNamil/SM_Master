@@ -15,7 +15,6 @@
 extern int putchar(int c);
 extern uint8_t gUpdateBlockData[32];
 uint8_t gUpdateBlockSize;
-uint8_t gUpdateBlockRestored;
 uint32_t gUpdateTotalSize = 0;
 uint32_t gStartUpdateClock = 0;
 uint32_t gTimeoutUpdateClock = 0;
@@ -129,7 +128,7 @@ void PcToUartParse(void)
           else
             putchar(OTA_COMMAND_ACK);
         }
-        else if(cmd == OTA_COMMAND_RESPONSE_COMPLETE_BANK_SWAP)
+        else if(cmd == OTA_COMMAND_COMPLETE_BANK_SWAP)
         {
             gStartUpdateClock = 0;
             memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 

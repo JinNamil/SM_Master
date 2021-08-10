@@ -334,11 +334,11 @@ int main(void)
        (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
       initBleUpdateTimeout();
     
-    if(DMA_CH_UART_RX->CCR_b.EN == RESET)
-    {
-//      DMA_Config();
-      putchar('e');
-    }
+//    if(DMA_CH_UART_RX->CCR_b.EN == RESET)
+//    {
+////      DMA_Config();
+//      putchar('e');
+//    }
   }
   
 }
