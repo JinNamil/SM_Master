@@ -30,8 +30,6 @@ typedef struct masterRoleContextS {
   uint8_t characMainSer[100];
   uint16_t mainHandle;
   uint16_t mainGetInfoHandle;
-  uint16_t mainVal_length;
-  uint8_t mainValue[2];
   uint8_t enableNotif;
 } masterRoleContextType;
 

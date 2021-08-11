@@ -18,6 +18,7 @@
 
 /******************** Device Init Parameters *******************/
 
+#define SECURE_CONNECTIONS_USER_MODE SC_IS_MANDATORY /* Supported &  mandatory:  it forces LE Secure connections,  if peripheral supports it with at least SC_IS_SUPPORTED option */
 /**
  * @brief Public Address Type
  *
@@ -28,7 +29,7 @@
  * @brief  Master public address.
  * 
  */ 
-#define MASTER_PUBLIC_ADDRESS {0xFC, 0x12, 0x00, 0xE1, 0x80, 0x02}
+#define MASTER_PUBLIC_ADDRESS {0xDC, 0x12, 0x00, 0xE1, 0x80, 0x02}
 
 /**
  * @brief Transmit power level
@@ -113,7 +114,38 @@
  */
 #define SUPERVISION_TIMEOUT 20
 
+#define MITM_MODE MITM_PROTECTION_REQUIRED /* MITM is enabled */
+
+/** 
+  * @brief Fixed pin usage
+*/
+#define FIXED_PIN_POLICY  USE_FIXED_PIN_FOR_PAIRING /* use fixed pin */
+
+/** 
+  * @brief IO capability
+*/
+#define IO_CAPABILITY  IO_CAP_KEYBOARD_ONLY /* Keyboard only: if Peripheral sets  Display only --> Pass Key entry (fixed pin)*/
+
+/** 
+  * @brief Secure Connections support level
+*/
+#define SECURE_CONNECTION_SUPPORT  SECURE_CONNECTIONS_USER_MODE
+
+/** 
+  * @brief KeyPress notification support
+*/
+#define KEYPRESS_NOTIFICATION  KEYPRESS_IS_NOT_SUPPORTED /* Not supported */
+
+/** 
+  * @brief Identity address tyoe
+*/
+#define IDENTITY_ADDRESS  0x00 /* Public address  */
 
 #endif /*__MASTER_CONFIG_H */
 
+#define MASTER_PASS_KEY 123459
+   
+#define MIN_KEY_SIZE 0x07
+   
+#define MAX_KEY_SIZE 0x10
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

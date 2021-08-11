@@ -302,6 +302,11 @@ int main(void)
     ;
   }
   
+  ret = Device_Security();
+  if (ret != BLE_STATUS_SUCCESS) {
+    while(1);
+  }
+  
   SysTick_Config(SYST_CLOCK);
   /* Main loop */
   while(1) {

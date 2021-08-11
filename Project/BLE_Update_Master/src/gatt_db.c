@@ -49,9 +49,41 @@ uint8_t MAIN_FIRMWARE_READ_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18
 
 extern uint8_t getUpdatePacketSize(void);
 masterRoleContextType masterContext;
+securitySetType sec_param;
 connectionContexts_t gConnectionContext;
 uint8_t gUpdateBlockData[64] = {0,};
 
+
+uint8_t Device_Security(void)
+{
+  uint8_t ret; 
+
+  ret = Master_ClearSecurityDatabase();
+  gTestStatus = ret;
+  
+  sec_param.ioCapability = IO_CAPABILITY;
+  sec_param.mitm_mode = MITM_MODE;
+  
+  sec_param.Min_Encryption_Key_Size = MIN_KEY_SIZE; 
+  sec_param.Max_Encryption_Key_Size = MAX_KEY_SIZE;
+  sec_param.bonding_mode = BONDING;
+  sec_param.use_fixed_pin = FIXED_PIN_POLICY;
+    
+  sec_param.fixed_pin = MASTER_PASS_KEY; /* used only if use fixed pin policy is enabled */
+  
+  /* BLE Security v4.2 is supported: BLE stack FW version >= 2.x */
+  sec_param.sc_support = SECURE_CONNECTION_SUPPORT; 
+  sec_param.keypress_support = KEYPRESS_NOTIFICATION; 
+  sec_param.identity_address_type = IDENTITY_ADDRESS; 
+       
+  ret = Master_SecuritySet(&sec_param);
+  gTestStatus = ret;
+  if (ret != BLE_STATUS_SUCCESS) {
+    PRINTF("Error in Master_SecuritySet() 0x%02x\r\n", ret);
+  
+  }
+  return ret; 
+}
 /*******************************************************************************
 * Function Name  : deviceInit
 * Description    : Device init
@@ -262,7 +294,7 @@ void Master_DeviceDiscovery_CB(uint8_t *status, uint8_t *addr_type, uint8_t *add
 {
   uint8_t i, deviceOffset = 0;
   uint8_t scannedMacAddr[BLE_MAC_ADDR_LEN] = {0,};
-  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x11};
+  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x12};
 //  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC};
   uint8_t deviceName[6] = {0,};
   uint32_t deviceNameLen = 0;
@@ -343,8 +375,8 @@ void Master_Connection_CB(uint8_t *connection_evt, uint8_t *status, uint16_t *co
    gConnectionContext.isBleConnection = FALSE;
     gConnectionContext.isBleConnectionAlarm = FALSE;
 //    deviceDiscovery();
-  masterContext.startDeviceDisc = TRUE;
     masterContext.connHandle = 0xFFFF;
+//    deviceConnection();
     break;
   case STOP_CONNECTION_PROCEDURE_EVT:
     PRINTF("****STOP CONNECTION PROCEDURE EVENT\r\n");
