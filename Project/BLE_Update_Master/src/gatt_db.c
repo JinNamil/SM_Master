@@ -59,7 +59,6 @@ uint8_t Device_Security(void)
   uint8_t ret; 
 
   ret = Master_ClearSecurityDatabase();
-  gTestStatus = ret;
   
   sec_param.ioCapability = IO_CAPABILITY;
   sec_param.mitm_mode = MITM_MODE;
@@ -77,7 +76,6 @@ uint8_t Device_Security(void)
   sec_param.identity_address_type = IDENTITY_ADDRESS; 
        
   ret = Master_SecuritySet(&sec_param);
-  gTestStatus = ret;
   if (ret != BLE_STATUS_SUCCESS) {
     PRINTF("Error in Master_SecuritySet() 0x%02x\r\n", ret);
   
@@ -104,7 +102,6 @@ uint8_t deviceInit(void)
   masterContext.mainFlag = FALSE;
   masterContext.enableNotif = FALSE;
   gConnectionContext.isBleConnection = FALSE;
-  gConnectionContext.isBleConnectionAlarm = FALSE;
   gConnectionContext.isUartConnection = FALSE;
   masterContext.connHandle = 0xFFFF;
 
@@ -294,7 +291,7 @@ void Master_DeviceDiscovery_CB(uint8_t *status, uint8_t *addr_type, uint8_t *add
 {
   uint8_t i, deviceOffset = 0;
   uint8_t scannedMacAddr[BLE_MAC_ADDR_LEN] = {0,};
-  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x12};
+  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x11};
 //  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC};
   uint8_t deviceName[6] = {0,};
   uint32_t deviceNameLen = 0;
@@ -373,10 +370,11 @@ void Master_Connection_CB(uint8_t *connection_evt, uint8_t *status, uint16_t *co
     PRINTF("****DISCONNECTION EVENT\r\n");
     /* Restart Discovery & Connection procedure */
    gConnectionContext.isBleConnection = FALSE;
-    gConnectionContext.isBleConnectionAlarm = FALSE;
 //    deviceDiscovery();
     masterContext.connHandle = 0xFFFF;
 //    deviceConnection();
+    if(getUpdateMode())
+      initBleUpdateTimeout();
     break;
   case STOP_CONNECTION_PROCEDURE_EVT:
     PRINTF("****STOP CONNECTION PROCEDURE EVENT\r\n");
@@ -479,10 +477,11 @@ void bleWriteTask(void)
   if((GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV) || (GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV) 
      || (GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV))
   {
-    DMA_CH_UART_RX->CCR_b.EN = RESET;
     if (Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, getUpdatePacketSize(), gUpdateBlockData) 
         != BLE_STATUS_SUCCESS)
-      ;
+    {
+      initBleUpdateTimeout();  
+    }
     else
     {      
       if(GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV)
@@ -500,7 +499,6 @@ void bleWriteTask(void)
 //        SetBleStatus(STATUS_PC_REQUEST_BANK_SWAP_COMPLETE);
       }
     }
-    DMA_CH_UART_RX->CCR_b.EN = SET;
   }
 }
 
@@ -534,7 +532,7 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
             masterContext.mainFlag = TRUE;
          }
           masterContext.enableNotif = TRUE;
-      }      
+      }
     }
     }
     break;
@@ -557,5 +555,4 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
     break;
   }
 }
-
 

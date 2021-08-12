@@ -9,8 +9,8 @@
 
 /*********************************** Define General ***********************************/
 #define MAX_TRX_BUF_SIZE								32
-#define ASCII_CR												0x0A
-#define ASCII_LF												0x0D
+#define ASCII_CR												0x0D
+#define ASCII_LF												0x0A
 /*********************************** Typedef Structer ***********************************/
 
 

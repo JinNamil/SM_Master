@@ -36,7 +36,6 @@ typedef struct masterRoleContextS {
 typedef struct connectionContexts{
   uint8_t isBleConnection;
   uint8_t isUartConnection;
-  uint8_t isBleConnectionAlarm;
 }connectionContexts_t;
   
 extern connectionContexts_t gConnectionContext;
@@ -51,5 +50,6 @@ void readTemperature(void);
 void readMainFwTest(void);
 void bleWriteTask(void);
 void pcResponseTask(void);
-
+uint8_t Device_Security(void);
+  
 #endif /* _GATT_DB_H_ */

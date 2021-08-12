@@ -179,7 +179,6 @@ void SdkEvalComUartInit(uint32_t baudrate)
 
   /* Enable UART */
   UART_Cmd(ENABLE);
-  
 }
 
 

@@ -251,6 +251,7 @@ void DMA_Config(void)
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
   DMA_Init(DMA_CH_UART_RX, &DMA_InitStructure);
   DMA_Cmd(DMA_CH_UART_RX, ENABLE);
+  DMA_Cmd(DMA_CH_UART_TX, DISABLE);
   
   UART_DMACmd(UART_DMAReq_Rx, ENABLE);
   
@@ -268,9 +269,8 @@ void DMA_Config(void)
 * Return         : None.
 *******************************************************************************/
 
-extern void PcToUartParse(void);
-extern unsigned int GetBleUpdateTimeout(void);
 extern uint32_t gStartUpdateClock;
+
 int main(void)
 {    
   uint8_t ret;
@@ -283,6 +283,7 @@ int main(void)
    
   /* Configure I/O communication channel */
   SdkEvalComUartInit(UART_BAUDRATE);
+  SdkEvalComUartIrqConfig(DISABLE);
 //  SdkEvalComUartIrqConfig(ENABLE);
   
   DMA_Config();
@@ -308,24 +309,20 @@ int main(void)
   }
   
   SysTick_Config(SYST_CLOCK);
+  
   /* Main loop */
   while(1) {
     /* BLE Stack Tick */
-    
     BTLE_StackTick();
     
     /* Master Tick */
     Master_Process(); 
     
-    if((GetBleStatus() == STATUS_PC_REQUEST_COMMAND_WAIT) 
-       || (GetBleStatus() == STATUS_PC_REQUEST_DATA_WAIT))
+    if((GetBleStatus() == STATUS_PC_REQUEST_COMMAND_WAIT) || (GetBleStatus() == STATUS_PC_REQUEST_DATA_WAIT))
       PcToUartParse();
     
     if(gConnectionContext.isBleConnection)
-    {
       bleWriteTask();
-//      pcResponseTask();
-    }
     else
     {
       if (masterContext.findCharacOfService)
@@ -342,12 +339,9 @@ int main(void)
       }
     }
     
-    if((gStartUpdateClock > 0) && 
-       (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
+    if((gStartUpdateClock > 0) && (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
       initBleUpdateTimeout();
-    
   }
-  
 }
 
 /* Hardware Error event. 

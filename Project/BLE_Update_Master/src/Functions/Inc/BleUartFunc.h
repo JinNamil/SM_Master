@@ -10,7 +10,7 @@
  [ST][LNE][CMD][MAGIC][Data Packet][ChecSum][End]
   =========================================== */
 #define UART_QUEUE_SIZE		        64
-#define UART_BUFFER_SIZE 32
+#define UART_BUFFER_SIZE                64
 /*********************************** Typedef Structer ***********************************/
 typedef struct _UartFifoTag
 {
@@ -27,7 +27,7 @@ typedef struct
 	uint16_t	blkTotal;
 	uint8_t		cr;
 	uint8_t		lf;
-} UpdateStartPacket_t;
+} CommandPacket_t;
 #pragma pack(pop)
 
 typedef enum
@@ -54,6 +54,11 @@ void getBleUpdateTimeout(void);
 void initBleUpdateTimeout(void);
 void SetBleStatus(uint32_t status);
 uint32_t GetBleStatus(void);
+void setUpdateMode(uint8_t flag);
+uint8_t getUpdateMode(void);
+void dmaBufferInit(void);
+void PcToUartParse(void);
+uint32_t GetBleUpdateTimeout(void);
 #endif /* __BLEUARTFUNC_H__ */
 
 

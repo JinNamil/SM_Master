@@ -112,7 +112,7 @@
  * This time is 200 ms.
  * The expression is Timeout = N x 10 ms
  */
-#define SUPERVISION_TIMEOUT 20
+#define SUPERVISION_TIMEOUT 500
 
 #define MITM_MODE MITM_PROTECTION_REQUIRED /* MITM is enabled */
 
