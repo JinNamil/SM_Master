@@ -59,7 +59,6 @@ uint8_t Device_Security(void)
   uint8_t ret; 
 
   ret = Master_ClearSecurityDatabase();
-  gTestStatus = ret;
   
   sec_param.ioCapability = IO_CAPABILITY;
   sec_param.mitm_mode = MITM_MODE;
@@ -77,7 +76,6 @@ uint8_t Device_Security(void)
   sec_param.identity_address_type = IDENTITY_ADDRESS; 
        
   ret = Master_SecuritySet(&sec_param);
-  gTestStatus = ret;
   if (ret != BLE_STATUS_SUCCESS) {
     PRINTF("Error in Master_SecuritySet() 0x%02x\r\n", ret);
   
@@ -294,8 +292,7 @@ void Master_DeviceDiscovery_CB(uint8_t *status, uint8_t *addr_type, uint8_t *add
 {
   uint8_t i, deviceOffset = 0;
   uint8_t scannedMacAddr[BLE_MAC_ADDR_LEN] = {0,};
-  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x12};
-//  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC};
+  uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x11};
   uint8_t deviceName[6] = {0,};
   uint32_t deviceNameLen = 0;
   
