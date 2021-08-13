@@ -4,6 +4,7 @@
 
 
 #define BLE_TX_BUFFER_SIZE 20
+#define BLE_CMD_SIZE 3
 
 #define OTA_COMMAND_START_UPDATE		0x0A
 #define OTA_COMMAND_SEND_PACKET			0x0B
@@ -43,6 +44,7 @@ extern connectionContexts_t gConnectionContext;
 extern masterRoleContextType masterContext;
 
 uint8_t deviceInit(void);
+uint8_t Device_Security(void);
 uint8_t deviceDiscovery(void);
 uint8_t deviceConnection(void);
 void findCharcOfService(void);

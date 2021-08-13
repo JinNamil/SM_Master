@@ -371,9 +371,7 @@ void Master_Connection_CB(uint8_t *connection_evt, uint8_t *status, uint16_t *co
     /* Restart Discovery & Connection procedure */
    gConnectionContext.isBleConnection = FALSE;
     gConnectionContext.isBleConnectionAlarm = FALSE;
-//    deviceDiscovery();
     masterContext.connHandle = 0xFFFF;
-//    deviceConnection();
     break;
   case STOP_CONNECTION_PROCEDURE_EVT:
     PRINTF("****STOP CONNECTION PROCEDURE EVENT\r\n");
@@ -486,7 +484,6 @@ void bleWriteTask(void)
       {
         putchar(OTA_COMMAND_ACK);
         SetBleStatus(STATUS_PC_REQUEST_DATA_WAIT);
-//        SetBleStatus(STATUS_BLE_SEND_DATA_COMPLETE);
       }
       else if(GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV)
         SetBleStatus(STATUS_BLE_SEND_COMMAND_COMPLETE);
@@ -494,7 +491,6 @@ void bleWriteTask(void)
       {        
         putchar(OTA_COMMAND_ACK);
         SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
-//        SetBleStatus(STATUS_PC_REQUEST_BANK_SWAP_COMPLETE);
       }
     }
     DMA_CH_UART_RX->CCR_b.EN = SET;

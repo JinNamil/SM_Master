@@ -268,8 +268,6 @@ void DMA_Config(void)
 * Return         : None.
 *******************************************************************************/
 
-extern void PcToUartParse(void);
-extern unsigned int GetBleUpdateTimeout(void);
 extern uint32_t gStartUpdateClock;
 int main(void)
 {    
@@ -283,10 +281,8 @@ int main(void)
    
   /* Configure I/O communication channel */
   SdkEvalComUartInit(UART_BAUDRATE);
-//  SdkEvalComUartIrqConfig(ENABLE);
   
   DMA_Config();
-//  Clock_Init();
   SetBleUpdateTimeout(10);
   SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
   
@@ -322,10 +318,7 @@ int main(void)
       PcToUartParse();
     
     if(gConnectionContext.isBleConnection)
-    {
       bleWriteTask();
-//      pcResponseTask();
-    }
     else
     {
       if (masterContext.findCharacOfService)
@@ -344,7 +337,7 @@ int main(void)
     
     if((gStartUpdateClock > 0) && 
        (GetBleUpdateTimeout() + gStartUpdateClock) <= Clock_Time())
-      initBleUpdateTimeout();
+      InitBleUpdateTimeout();
     
   }
   
