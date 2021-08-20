@@ -48,13 +48,13 @@
     <StLinkDriver>
         <stlinkserialNo>27130243</stlinkserialNo>
         <stlinkfoundProbes />
-        <stlinkResetStyle>0</stlinkResetStyle>
-        <stlinkResetStrategy>0</stlinkResetStrategy>
         <CStepIntDis>_ 0</CStepIntDis>
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
+        <stlinkResetStyle>0</stlinkResetStyle>
+        <stlinkResetStrategy>0</stlinkResetStrategy>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>466189122</Checksum>
+        <Checksum>2755449709</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -70,11 +70,6 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
-    <LogFile>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-        <Category>_ 0</Category>
-    </LogFile>
     <CallStackLog>
         <Enabled>0</Enabled>
     </CallStackLog>
@@ -87,6 +82,11 @@
     <Breakpoints2>
         <Count>0</Count>
     </Breakpoints2>
+    <LogFile>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+        <Category>_ 0</Category>
+    </LogFile>
     <Aliases>
         <A0>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile.c" ""</A0>
         <A1>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_sm.c" ""</A1>

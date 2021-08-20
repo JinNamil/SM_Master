@@ -307,7 +307,6 @@ int main(void)
   /* Main loop */
   while(1) {
     /* BLE Stack Tick */
-    
     BTLE_StackTick();
     
     /* Master Tick */

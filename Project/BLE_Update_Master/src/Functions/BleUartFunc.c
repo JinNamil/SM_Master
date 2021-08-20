@@ -158,6 +158,15 @@ void PcToUartParse(void)
           gUpdateTotalSize = 0; 
           SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
         }
+        else if(cmd == OTA_COMMAND_BLE_START_UPDATE)       //ble update ~ing
+        {
+          memset(gUpdateBlockData, 0x00, 64);
+          memcpy(gUpdateBlockData, gBufferUart, BLE_CMD_SIZE); 
+          memset(gBufferUart, 0x00, sizeof(gBufferUart));
+          setUpdatePacketSize(BLE_CMD_SIZE);
+          gUpdateTotalSize = 0; 
+          SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
+        }
         else
         {
           updateStartPacket = (UpdateStartPacket_t*)gBufferUart;

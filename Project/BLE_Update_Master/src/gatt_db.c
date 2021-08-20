@@ -290,17 +290,15 @@ void Master_DeviceDiscovery_CB(uint8_t *status, uint8_t *addr_type, uint8_t *add
 			       uint8_t *data_length, uint8_t *data,
 			       int8_t *RSSI)
 {
-  uint8_t i, deviceOffset = 0;
+  uint8_t i = 0;
   uint8_t scannedMacAddr[BLE_MAC_ADDR_LEN] = {0,};
   uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x11};
-  uint8_t deviceName[6] = {0,};
-  uint32_t deviceNameLen = 0;
   
-  for(int j = 5; j < 12; j++)
-  {
-    deviceName[deviceOffset++] = data[j];
-  }
-  deviceNameLen = *data_length;
+//  for(int j = 5; j < 12; j++)
+//  {
+//    deviceName[deviceOffset++] = data[j];
+//  }
+//  deviceNameLen = *data_length;
 
   if (*status == DEVICE_DISCOVERED) {
     for(i=0; i<BLE_MAC_ADDR_LEN; i++)
