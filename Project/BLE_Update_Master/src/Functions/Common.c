@@ -27,3 +27,14 @@ unsigned char MakeCheckSum(unsigned char *pPacket, unsigned char nCnt)
 	}
 	return nCheckSum;
 }
+
+unsigned char MakeBleCheckSum(unsigned char* pPacket, unsigned char nCnt)
+{
+	unsigned char i = 0;
+	unsigned char nCheckSum = 0;
+	for (i = 0; i < nCnt; i++)
+	{
+		nCheckSum ^= pPacket[i];
+	}
+	return nCheckSum;
+}

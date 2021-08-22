@@ -17,5 +17,6 @@
 /************************************ Define Functions ************************************/
 unsigned char hex2Digit(unsigned char ch);
 unsigned char MakeCheckSum(unsigned char *pPacket, unsigned char nCnt);
+unsigned char MakeBleCheckSum(unsigned char* pPacket, unsigned char nCnt);
 #endif
 

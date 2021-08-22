@@ -31,6 +31,16 @@ typedef struct
 } UpdateStartPacket_t;
 #pragma pack(pop)
 
+#pragma pack(push, 1)
+typedef struct
+{
+	uint8_t	 checksum;
+	uint8_t	 data[16];
+	uint8_t  isNoti;
+	uint16_t blkOffset;
+} BleUpdatePacket_t;
+#pragma pack(pop)
+
 typedef enum
 {
         STATUS_PC_REQUEST_COMMAND_WAIT = 0,
