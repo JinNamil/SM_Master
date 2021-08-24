@@ -48,13 +48,13 @@
     <StLinkDriver>
         <stlinkserialNo>27130243</stlinkserialNo>
         <stlinkfoundProbes />
-        <stlinkResetStyle>0</stlinkResetStyle>
-        <stlinkResetStrategy>0</stlinkResetStrategy>
         <CStepIntDis>_ 0</CStepIntDis>
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
+        <stlinkResetStyle>0</stlinkResetStyle>
+        <stlinkResetStrategy>0</stlinkResetStrategy>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>2755449709</Checksum>
+        <Checksum>1726961727</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -66,32 +66,33 @@
     <Disassembly>
         <MixedMode>1</MixedMode>
     </Disassembly>
-    <TermIOLog>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-    </TermIOLog>
-    <CallStackLog>
-        <Enabled>0</Enabled>
-    </CallStackLog>
-    <CallStackStripe>
-        <ShowTiming>1</ShowTiming>
-    </CallStackStripe>
-    <LogFile>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-        <Category>_ 0</Category>
-    </LogFile>
     <DisassembleMode>
         <mode>0</mode>
     </DisassembleMode>
     <Breakpoints2>
         <Count>0</Count>
     </Breakpoints2>
+    <TermIOLog>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+    </TermIOLog>
+    <LogFile>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+        <Category>_ 0</Category>
+    </LogFile>
     <Aliases>
         <A0>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile.c" ""</A0>
-        <A1>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_sm.c" ""</A1>
-        <A2>_ "c:\Program Files (x86)\IAR Systems\Embedded Workbench 8.40_1\arm\inc\c\DLib_Product_string.h" ""</A2>
-        <Count>3</Count>
+        <A1>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_events.c" ""</A1>
+        <A2>_ "C:\GIT_vobs\BlueNRG1_2_DK_3_2_1\Library\BLE_Application\Profile_Central\profiles\ble_profile\master_basic_profile_sm.c" ""</A2>
+        <A3>_ "c:\Program Files (x86)\IAR Systems\Embedded Workbench 8.40_1\arm\inc\c\DLib_Product_string.h" ""</A3>
+        <Count>4</Count>
         <SuppressDialog>0</SuppressDialog>
     </Aliases>
+    <CallStackLog>
+        <Enabled>0</Enabled>
+    </CallStackLog>
+    <CallStackStripe>
+        <ShowTiming>1</ShowTiming>
+    </CallStackStripe>
 </settings>

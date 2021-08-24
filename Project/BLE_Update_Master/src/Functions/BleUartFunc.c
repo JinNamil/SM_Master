@@ -22,13 +22,16 @@ uint32_t gTimeoutUpdateClock = 0;
 uint32_t gStatus = 0;
 uint8_t gBufferUart[UART_BUFFER_SIZE] = {0,};
 uint32_t gBufferUartLen = 0;
+uint8_t gUpdateMode = CONN_MCU_MODE;
+uint16_t gOtaUpdateHandle = 0;
+uint8_t gIsUpdateLastPacket = 0;
 
 hUARTQUEUE	hUartQueue;
 static unsigned char g_UartQueue[UART_QUEUE_SIZE] = {0x0, };
 uint8_t         gFwUpdateFlag = 0;
 uint32_t        gFwSize = 0;
 uint16_t        gBlockSize = 0;
-
+OtaUpdateInfoPacket_t gOtaUpdateInfoPacket = {0,};
 
 void UartWrite(const unsigned char * buffer, size_t size)
 {   
@@ -95,6 +98,38 @@ uint32_t GetBleStatus(void)
   return gStatus;
 }
 
+void SetConnUpdateMode(uint8_t mode)
+{
+  gUpdateMode = mode;
+  return;
+}
+
+uint8_t GetConnUpdateMode(void)
+{
+  return gUpdateMode;
+}
+
+void SetOtaUpdateHandle(uint16_t handle)
+{
+  gOtaUpdateHandle = handle;
+  return;
+}
+uint16_t GetOtaUpdateHandle(void)
+{
+  return gOtaUpdateHandle;
+}
+
+void SetIsUpdateLastPacket(uint8_t flag)
+{
+  gIsUpdateLastPacket = flag;
+  return;
+}
+
+uint8_t GetIsUpdateLastPacket(void)
+{
+  return gIsUpdateLastPacket;
+}
+
 uint16_t dmaReceiveDataLen(void)
 {
   return (UART_BUFFER_SIZE - DMA_GetCurrDataCounter(DMA_CH_UART_RX));
@@ -158,28 +193,47 @@ void PcToUartParse(void)
           gUpdateTotalSize = 0; 
           SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
         }
-        else if(cmd == OTA_COMMAND_BLE_START_UPDATE)       //ble update ~ing
-        {
-          memset(gUpdateBlockData, 0x00, 64);
-          memcpy(gUpdateBlockData, gBufferUart, BLE_CMD_SIZE); 
-          memset(gBufferUart, 0x00, sizeof(gBufferUart));
-          setUpdatePacketSize(BLE_CMD_SIZE);
-          gUpdateTotalSize = 0; 
-          SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
-        }
+//        else if(cmd == OTA_COMMAND_BLE_START_UPDATE)
+//        {
+//          gStartUpdateClock = Clock_Time();
+//          gBufferUart[0] = 0x01;
+//          memcpy(gUpdateBlockData, gBufferUart, 1); 
+//          setUpdatePacketSize(1);
+//          SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
+//          SetOtaUpdateHandle(masterContext.otaExpImgTuSeqHandle);
+//        }
         else
         {
           updateStartPacket = (UpdateStartPacket_t*)gBufferUart;
-          if(updateStartPacket->cmd == OTA_COMMAND_START_UPDATE)
+          if(GetConnUpdateMode() == CONN_MCU_MODE)
           {
-            gStartUpdateClock = Clock_Time();
-            gFwSize = updateStartPacket->fwSize;
-            gBlockSize = updateStartPacket->blkTotal;
-            
-            memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
-            setUpdatePacketSize(BLE_CMD_SIZE);
-            SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
-            setUpdateMode(TRUE);
+            if(updateStartPacket->cmd == OTA_COMMAND_START_UPDATE)
+            {
+              gStartUpdateClock = Clock_Time();
+              gFwSize = updateStartPacket->fwSize;
+              gBlockSize = updateStartPacket->blkTotal;
+              
+              memcpy(gUpdateBlockData, gBufferUart, sizeof(updateStartPacket)); 
+              setUpdatePacketSize(BLE_CMD_SIZE);
+              SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
+              setUpdateMode(TRUE);
+            }
+          }
+          else if(GetConnUpdateMode() == CONN_BLE_MODE)
+          {
+            if(updateStartPacket->cmd == OTA_COMMAND_START_UPDATE)
+            {
+              gFwSize = updateStartPacket->fwSize;
+              gOtaUpdateInfoPacket.radioRange = 0x08;
+              gOtaUpdateInfoPacket.fwSize = updateStartPacket->fwSize;
+              gOtaUpdateInfoPacket.baseAddr = 0x10051000;
+              memset(&updateStartPacket, 0x00, sizeof(updateStartPacket));
+              memcpy(gUpdateBlockData, &gOtaUpdateInfoPacket, sizeof(gOtaUpdateInfoPacket));
+              setUpdatePacketSize(sizeof(gOtaUpdateInfoPacket));
+              SetBleStatus(STATUS_PC_REQUEST_COMMAND_RECV);
+              SetOtaUpdateHandle(masterContext.otaNewImgHandle);
+              setUpdateMode(TRUE);
+            }
           }
         }
       }
@@ -188,20 +242,35 @@ void PcToUartParse(void)
     {
       if(recvBuffLen == BLE_TX_BUFFER_SIZE)
       {
-        SetBleStatus(STATUS_PC_REQUEST_DATA_RECV);
-        dmaBufferInit();
-        gStartUpdateClock = Clock_Time();
-        gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
-        
-        if(gUpdateTotalSize > gFwSize)
-          setUpdatePacketSize((BLE_TX_BUFFER_SIZE - (gUpdateTotalSize - gFwSize)));
-        else
-          setUpdatePacketSize(BLE_TX_BUFFER_SIZE);
-        
-        if(gUpdateTotalSize >= gFwSize)
-          setUpdateMode(FALSE);
-        
-        memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);
+          SetBleStatus(STATUS_PC_REQUEST_DATA_RECV);
+          dmaBufferInit();
+          gStartUpdateClock = Clock_Time();
+          
+          if(GetConnUpdateMode() == CONN_BLE_MODE)
+            gUpdateTotalSize += 16;
+          else if(GetConnUpdateMode() == CONN_MCU_MODE)
+            gUpdateTotalSize += BLE_TX_BUFFER_SIZE;
+          
+          if(gUpdateTotalSize > gFwSize)
+            setUpdatePacketSize((BLE_TX_BUFFER_SIZE - (gUpdateTotalSize - gFwSize)));
+          else
+            setUpdatePacketSize(BLE_TX_BUFFER_SIZE);
+          
+          if(GetConnUpdateMode() == CONN_BLE_MODE)
+          {
+            SetOtaUpdateHandle(masterContext.otaNewImgTuContentHandle);
+            setUpdatePacketSize(BLE_TX_BUFFER_SIZE);
+          }
+            
+          if(gUpdateTotalSize >= gFwSize)
+          {
+            SetIsUpdateLastPacket(TRUE);
+            setUpdateMode(FALSE);
+//            if(GetConnUpdateMode() == CONN_BLE_MODE)
+//              Master_CloseConnection(masterContext.connHandle);
+          }
+          
+          memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);
       }
       else if(recvBuffLen > BLE_TX_BUFFER_SIZE)
         InitBleUpdateTimeout();

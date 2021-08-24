@@ -47,12 +47,23 @@ uint8_t MAIN_FIRMWARE_SERVICE_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0
 uint8_t MAIN_FIRMWARE_WRITE_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x01,0x90,0x58,0xDE};
 uint8_t MAIN_FIRMWARE_READ_CHAR_UUID[] = {0xE5,0x49,0xD2,0x79,  0x4F,0x32,  0x18,0xBD,  0x48,0x41,  0x54,0x50,0x02,0x90,0x58,0xDE};
 
+/* Service and Characteristic UUID expected from slave bootloader */
+//uint8_t BTL_SERVICE_UUID[]                   = {0x8a,0x97,0xf7,0xc0,0x85,0x06,0x11,0xe3,0xba,0xa7,0x08,0x00,0x20,0x0c,0x9a,0x66};
+uint8_t BTL_SERVICE_UUID[]                   = {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x06,0x85,0xc0,0xf7,0x97,0x8a};
+//uint8_t IMAGE_CHAR_UUID[]                    = {0x12,0x2e,0x8c,0xc0,0x85,0x08,0x11,0xe3,0xba,0xa7,0x08,0x00,0x20,0x0c,0x9a,0x66};
+uint8_t IMAGE_CHAR_UUID[]                    = {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x08,0x85,0xc0,0x8c,0x2e,0x12};
+//uint8_t NEW_IMAGE_CHAR_UUID[]                = {0x21,0x0f,0x99,0xf0,0x85,0x08,0x11,0xe3,0xba,0xa7,0x08,0x00,0x20,0x0c,0x9a,0x66};
+uint8_t NEW_IMAGE_CHAR_UUID[]                = {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x08,0x85,0xf0,0x99,0x0f,0x21};
+//uint8_t NEW_IMAGE_TU_CONTENT_CHAR_UUID[]     = {0x26,0x91,0xaa,0x80,0x85,0x08,0x11,0xe3,0xba,0xa7,0x08,0x00,0x20,0x0c,0x9a,0x66};
+uint8_t NEW_IMAGE_TU_CONTENT_CHAR_UUID[]     = {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x08,0x85,0x80,0xaa,0x91,0x26};
+//uint8_t EXPECTED_IMAGE_TU_CONTENT_CHAR_UUID[]= {0x2b,0xdc,0x57,0x60,0x85,0x08,0x11,0xe3,0xba,0xa7,0x08,0x00,0x20,0x0c,0x9a,0x66};
+uint8_t EXPECTED_IMAGE_TU_CONTENT_CHAR_UUID[]= {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x08,0x85,0x60,0x57,0xdc,0x2b};
+
 extern uint8_t getUpdatePacketSize(void);
 masterRoleContextType masterContext;
 securitySetType sec_param;
 connectionContexts_t gConnectionContext;
 uint8_t gUpdateBlockData[64] = {0,};
-
 
 uint8_t Device_Security(void)
 {
@@ -100,6 +111,7 @@ uint8_t deviceInit(void)
   masterContext.findCharacOfService = FALSE;
   masterContext.genAttFlag = FALSE;
   masterContext.mainFlag = FALSE;
+  masterContext.otaFlag = FALSE;
   masterContext.enableNotif = FALSE;
   gConnectionContext.isBleConnection = FALSE;
   gConnectionContext.isBleConnectionAlarm = FALSE;
@@ -248,6 +260,15 @@ void findCharcOfService(void)
       max_size = sizeof(masterContext.characMainSer);
     }
     
+    /* Discovery all the characteristics of the Slave Peripheral Service */
+    if ((memcmp(uuid, BTL_SERVICE_UUID, (sizeElement-4)) == 0) && masterContext.otaFlag) {
+      memcpy((uint8_t*)&startHandle, &masterContext.primarySer[index], 2);
+      memcpy((uint8_t*)&endHandle, &masterContext.primarySer[index+2], 2);
+      numCharac = &masterContext.numCharacOtaSer;
+      charac = masterContext.characOtaSer;
+      max_size = sizeof(masterContext.characOtaSer);
+    }
+    
     index += sizeElement;
   }
 
@@ -270,12 +291,34 @@ void extractCharacInfo(void)
   uint8_t i;
 
   /* Store in the master context the characteristic handles for the tempereture */
-  for (i=0; i<masterContext.numCharacMainSer; i++) {
-    if (memcmp(&masterContext.characMainSer[6+(i*22)], MAIN_FIRMWARE_WRITE_CHAR_UUID, 16) == 0) {
-      memcpy((uint8_t*)&masterContext.mainHandle, &masterContext.characMainSer[1+(i*22)], 2);
+  if(GetConnUpdateMode() == CONN_MCU_MODE)
+  {
+    for (i=0; i<masterContext.numCharacMainSer; i++) 
+    {
+      if (memcmp(&masterContext.characMainSer[6+(i*22)], MAIN_FIRMWARE_WRITE_CHAR_UUID, 16) == 0) {
+        memcpy((uint8_t*)&masterContext.mainHandle, &masterContext.characMainSer[1+(i*22)], 2);
+      }
+      if (memcmp(&masterContext.characMainSer[6+(i*22)], MAIN_FIRMWARE_READ_CHAR_UUID, 16) == 0) {
+        memcpy((uint8_t*)&masterContext.mainGetInfoHandle, &masterContext.characMainSer[1+(i*22)], 2);
+      }
     }
-    if (memcmp(&masterContext.characMainSer[6+(i*22)], MAIN_FIRMWARE_READ_CHAR_UUID, 16) == 0) {
-      memcpy((uint8_t*)&masterContext.mainGetInfoHandle, &masterContext.characMainSer[1+(i*22)], 2);
+  }
+  else if(GetConnUpdateMode() == CONN_BLE_MODE)
+  {
+    for (i=0; i<masterContext.numCharacOtaSer; i++) 
+    {
+      if (memcmp(&masterContext.characOtaSer[6+(i*22)], IMAGE_CHAR_UUID, 16) == 0) {
+        memcpy((uint8_t*)&masterContext.otaImageHandle, &masterContext.characOtaSer[1+(i*22)], 2);
+      }
+      if (memcmp(&masterContext.characOtaSer[6+(i*22)], NEW_IMAGE_CHAR_UUID, 16) == 0) {
+        memcpy((uint8_t*)&masterContext.otaNewImgHandle, &masterContext.characOtaSer[1+(i*22)], 2);
+      }
+      if (memcmp(&masterContext.characOtaSer[6+(i*22)], NEW_IMAGE_TU_CONTENT_CHAR_UUID, 16) == 0) {
+        memcpy((uint8_t*)&masterContext.otaNewImgTuContentHandle, &masterContext.characOtaSer[1+(i*22)], 2);
+      }
+      if (memcmp(&masterContext.characOtaSer[6+(i*22)], EXPECTED_IMAGE_TU_CONTENT_CHAR_UUID, 16) == 0) {
+        memcpy((uint8_t*)&masterContext.otaExpImgTuSeqHandle, &masterContext.characOtaSer[1+(i*22)], 2);
+      }
     }
   }
 }
@@ -294,25 +337,16 @@ void Master_DeviceDiscovery_CB(uint8_t *status, uint8_t *addr_type, uint8_t *add
   uint8_t scannedMacAddr[BLE_MAC_ADDR_LEN] = {0,};
   uint8_t slaveMacAddr[BLE_MAC_ADDR_LEN] = {0xBC, 0x9A, 0x78, 0x56, 0x34, 0x11};
   
-//  for(int j = 5; j < 12; j++)
-//  {
-//    deviceName[deviceOffset++] = data[j];
-//  }
-//  deviceNameLen = *data_length;
-
-  if (*status == DEVICE_DISCOVERED) {
+  if (*status == DEVICE_DISCOVERED)
+  {
     for(i=0; i<BLE_MAC_ADDR_LEN; i++)
     {
       scannedMacAddr[i] = addr[BLE_MAC_ADDR_LEN-i-1];
     }	// Ordering Mac Address
     
-    
-    
-    if(memcmp(slaveMacAddr, scannedMacAddr, BLE_MAC_ADDR_LEN) == 0)
+    if(((GetConnUpdateMode() == CONN_MCU_MODE) && (memcmp(slaveMacAddr, scannedMacAddr, BLE_MAC_ADDR_LEN) == 0))
+       || ((GetConnUpdateMode() == CONN_BLE_MODE) && !memcmp(&data[5], "OTAService", 10)))
     {
-      /* If the device found is a BlueNRG try to connect */
-//      if (!memcmp(&data[5], "2MANHOLE", 8))
-      { 
         PRINTF("BlueNRG device found\r\n");
         PRINTF("MAC Address: ");
         for(i = 0; i < BLE_MAC_ADDR_LEN; i++)
@@ -326,7 +360,6 @@ void Master_DeviceDiscovery_CB(uint8_t *status, uint8_t *addr_type, uint8_t *add
         if (deviceConnection() != BLE_STATUS_SUCCESS)
           PRINTF("Error during the device connection procedure\r\n");      
       } /*Find Defined Sensors*/
-    }
   }
   if (*status == DEVICE_DISCOVERY_PROCEDURE_ENDED)
     PRINTF("***Device Discovery Procedure ended from the application\r\n");
@@ -402,7 +435,10 @@ void Master_ServiceCharacPeerDiscovery_CB(uint8_t *procedure, uint8_t *status, u
         if(masterContext.genAttFlag)
         {
           masterContext.genAttFlag = FALSE;
-          masterContext.mainFlag = TRUE;
+          if(GetConnUpdateMode() == CONN_MCU_MODE)
+            masterContext.mainFlag = TRUE;
+          else if(GetConnUpdateMode() == CONN_BLE_MODE)
+            masterContext.otaFlag = TRUE;
           masterContext.findCharacOfService = TRUE;
         }
         else if(masterContext.mainFlag)
@@ -410,6 +446,13 @@ void Master_ServiceCharacPeerDiscovery_CB(uint8_t *procedure, uint8_t *status, u
           extractCharacInfo();
           masterContext.genAttFlag = TRUE;
           masterContext.mainFlag = FALSE;
+          masterContext.enableNotif = TRUE;
+        }
+        else if(masterContext.otaFlag)
+        {
+          extractCharacInfo();
+          masterContext.genAttFlag = TRUE;
+          masterContext.otaFlag = FALSE;
           masterContext.enableNotif = TRUE;
         }
       }
@@ -435,17 +478,40 @@ void enableSensorNotifications(void)
     if (ret != BLE_STATUS_SUCCESS)
       ;
   }
-
-  if(masterContext.mainFlag)
+  if(GetConnUpdateMode() == CONN_MCU_MODE)
   {
-    if(--masterContext.numCharacMainSer != 0)
-      handle = masterContext.mainHandle + 2;
-    else
-      handle = masterContext.mainGetInfoHandle + 2;
-    
-   ret = Master_NotifIndic_Status(masterContext.connHandle, handle, TRUE, FALSE);
-   if(ret != BLE_STATUS_SUCCESS)
-      ;
+    if(masterContext.mainFlag)
+    {
+      if(--masterContext.numCharacMainSer != 0)
+        handle = masterContext.mainHandle + 2;
+      else
+        handle = masterContext.mainGetInfoHandle + 2;
+      
+      ret = Master_NotifIndic_Status(masterContext.connHandle, handle, TRUE, FALSE);
+      if(ret != BLE_STATUS_SUCCESS)
+        ;
+    }
+  }
+  else if(GetConnUpdateMode() == CONN_BLE_MODE)
+  {
+    if(masterContext.otaFlag)
+    {
+      if(masterContext.numCharacOtaSer == 4)
+        handle = masterContext.otaImageHandle + 2;
+      else if(masterContext.numCharacOtaSer == 3)
+        handle = masterContext.otaNewImgHandle + 2;
+      else if(masterContext.numCharacOtaSer == 2)
+        handle = masterContext.otaNewImgTuContentHandle + 2;
+      else if(masterContext.numCharacOtaSer == 1)
+        handle = masterContext.otaExpImgTuSeqHandle + 2;
+      
+      masterContext.numCharacOtaSer-=1;
+      ret = Master_NotifIndic_Status(masterContext.connHandle, handle, TRUE, TRUE);
+      if(ret != BLE_STATUS_SUCCESS)
+        PRINTF("Master_NotifIndic_Status Fail");
+      else
+        PRINTF("Master_NotifIndic_Status Success");
+    }
   }
 }
 
@@ -466,16 +532,20 @@ void pcResponseTask(void)
     DMA_CH_UART_RX->CCR_b.EN = SET;
   }
 }
-
+uint8_t gExpFlag = 0x01;
 void bleWriteTask(void)
 {
   if((GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV) || (GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV) 
      || (GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV))
   {
-    DMA_CH_UART_RX->CCR_b.EN = RESET;
-    if (Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.mainHandle+1, getUpdatePacketSize(), gUpdateBlockData) 
+//    DMA_CH_UART_RX->CCR_b.EN = RESET;
+    
+    if(GetConnUpdateMode() != CONN_BLE_MODE)
+      SetOtaUpdateHandle(masterContext.mainHandle+1);
+    
+    if (Master_WriteWithoutResponse_Value(masterContext.connHandle, GetOtaUpdateHandle(), getUpdatePacketSize(), gUpdateBlockData) 
         != BLE_STATUS_SUCCESS)
-      ;
+      putchar(OTA_COMMAND_NACK);
     else
     {      
       if(GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV)
@@ -484,17 +554,42 @@ void bleWriteTask(void)
         SetBleStatus(STATUS_PC_REQUEST_DATA_WAIT);
       }
       else if(GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV)
-        SetBleStatus(STATUS_BLE_SEND_COMMAND_COMPLETE);
+      {
+//        if(getUpdateMode() == CONN_BLE_MODE)
+//        if(GetOtaUpdateHandle() == (masterContext.otaExpImgTuSeqHandle + 1))
+//          if(Master_Read_Value(masterContext.connHandle, GetOtaUpdateHandle(), 
+//            &masterContext.otaImageDataLen, masterContext.otaImageData, 20) == 0)
+//            putchar(OTA_COMMAND_ACK);
+//          else
+//            putchar(OTA_COMMAND_NACK);
+//        else
+        if(GetConnUpdateMode() == CONN_BLE_MODE)
+        {
+          if(GetOtaUpdateHandle() == (masterContext.otaNewImgHandle + 1))
+          {
+             if (Master_WriteWithoutResponse_Value(masterContext.connHandle, masterContext.otaExpImgTuSeqHandle + 1, 1, &gExpFlag) == BLE_STATUS_SUCCESS)
+              SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
+              putchar(OTA_COMMAND_ACK);
+          }
+          else
+          {
+            SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
+            putchar(OTA_COMMAND_ACK);
+          }
+        }
+        else
+          SetBleStatus(STATUS_BLE_SEND_COMMAND_COMPLETE);
+      }
       else if(GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV)
       {        
         putchar(OTA_COMMAND_ACK);
         SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
       }
     }
-    DMA_CH_UART_RX->CCR_b.EN = SET;
+//    DMA_CH_UART_RX->CCR_b.EN = SET;
   }
 }
-
+uint8_t gExpData[16];
 /*******************************************************************************
 * Function Name  : Master_PeerDataExchange_CB
 * Description    : Peer Device data exchange callback from master basic profile library
@@ -506,27 +601,51 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
   switch(*procedure) {
   case NOTIFICATION_INDICATION_CHANGE_STATUS:
     {
-      if (masterContext.genAttFlag) {
+      if (masterContext.genAttFlag) 
+      {
         masterContext.genAttFlag = FALSE;
-        masterContext.mainFlag = TRUE;
+        if(GetConnUpdateMode() == CONN_MCU_MODE)
+          masterContext.mainFlag = TRUE;
+        else if(GetConnUpdateMode() == CONN_BLE_MODE)
+          masterContext.otaFlag = TRUE;
         masterContext.enableNotif = TRUE;
       } 
-      else {
-       if (masterContext.mainFlag) {
-         if(masterContext.numCharacMainSer == 0)
-         {
-            masterContext.mainFlag = FALSE;
-            gConnectionContext.isBleConnection = TRUE;
-            putchar(OTA_COMMAND_DISCOVERY);
-            PRINTF("\r\n****Service Changed indication enabled mainFlag complete\r\n");
-         }
-         else
-         {
-            masterContext.mainFlag = TRUE;
-         }
-          masterContext.enableNotif = TRUE;
-      }      
-    }
+      else 
+      {
+        if(GetConnUpdateMode() == CONN_MCU_MODE)
+        {
+          if (masterContext.mainFlag) 
+          {
+            if(masterContext.numCharacMainSer == 0)
+            {
+              masterContext.mainFlag = FALSE;
+              gConnectionContext.isBleConnection = TRUE;
+              putchar(OTA_COMMAND_DISCOVERY);
+            }
+            else
+              masterContext.mainFlag = TRUE;
+            masterContext.enableNotif = TRUE;
+          }
+        }
+        else if(GetConnUpdateMode() == CONN_BLE_MODE)
+        {
+          if (masterContext.otaFlag) 
+          {
+            if(masterContext.numCharacOtaSer == 0)
+            {
+              masterContext.otaFlag = FALSE;
+              gConnectionContext.isBleConnection = TRUE;
+              putchar(OTA_COMMAND_DISCOVERY);
+              PRINTF("\r\n****Service Changed indication enabled otaFlag complete\r\n");
+            }
+            else
+            {
+              masterContext.otaFlag = TRUE;
+              masterContext.enableNotif = TRUE;
+            }
+          }
+        }
+      }
     }
     break;
   case NOTIFICATION_DATA_RECEIVED:
@@ -544,8 +663,32 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
             SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
         }
       }
+      else if((masterContext.otaNewImgTuContentHandle+1) == data->attr_handle)
+      {
+          putchar(OTA_COMMAND_ACK);
+          SetBleStatus(STATUS_PC_REQUEST_DATA_WAIT);
+      }
+      else if((masterContext.otaExpImgTuSeqHandle+1) == data->attr_handle)
+      {
+        for(int i = 0; i < data->data_length; i++)
+        {
+          gExpData[i] = data->data_value[i];
+        }
+        UartWrite(gExpData, data->data_length);
+      }
     }
     break;
+//  case READ_VALUE_STATUS:
+//    {
+//      if((masterContext.otaNewImgHandle+1) == data->attr_handle)
+//      {
+//        for(int i = 0; i < data->data_length; i++)
+//        {
+//          PRINTF("receive data: %02X", data->data_value[i]);
+//        }
+//      }
+//    }
+//    break;
   }
 }
 

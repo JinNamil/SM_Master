@@ -34,6 +34,15 @@ typedef struct
 #pragma pack(push, 1)
 typedef struct
 {
+	uint8_t		radioRange;
+	uint32_t	fwSize;
+	uint32_t	baseAddr;
+} OtaUpdateInfoPacket_t;
+#pragma pack(pop)
+  
+#pragma pack(push, 1)
+typedef struct
+{
 	uint8_t	 checksum;
 	uint8_t	 data[16];
 	uint8_t  isNoti;
@@ -64,8 +73,15 @@ void DeInitUartQueue(void);
 void SetBleUpdateTimeout(unsigned int nTimeOut);
 void InitBleUpdateTimeout(void);
 void SetBleStatus(uint32_t status);
+void SetConnUpdateMode(uint8_t mode);
+uint8_t GetConnUpdateMode(void);
 uint32_t GetBleStatus(void);
 uint32_t GetBleUpdateTimeout(void);
+void SetOtaUpdateHandle(uint16_t handle);
+uint16_t GetOtaUpdateHandle(void);
+void SetIsUpdateLastPacket(uint8_t flag);
+uint8_t GetIsUpdateLastPacket(void);
+void setUpdateMode(uint8_t flag);
 #endif /* __BLEUARTFUNC_H__ */
 
 

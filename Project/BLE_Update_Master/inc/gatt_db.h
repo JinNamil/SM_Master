@@ -30,9 +30,18 @@ typedef struct masterRoleContextS {
   uint8_t mainFlag;
   uint8_t numCharacMainSer;
   uint8_t characMainSer[100];
+  uint8_t otaFlag;
+  uint8_t numCharacOtaSer;
+  uint8_t characOtaSer[100];
   uint16_t mainHandle;
   uint16_t mainGetInfoHandle;
+  uint16_t otaImageHandle;
+  uint16_t otaNewImgHandle;
+  uint16_t otaNewImgTuContentHandle;
+  uint16_t otaExpImgTuSeqHandle;
   uint8_t enableNotif;
+  uint8_t otaImageData[20];
+  uint16_t otaImageDataLen;
 } masterRoleContextType;
 
 typedef struct connectionContexts{
@@ -41,6 +50,11 @@ typedef struct connectionContexts{
   uint8_t isBleConnectionAlarm;
 }connectionContexts_t;
   
+typedef enum
+{
+  CONN_MCU_MODE = 1,
+  CONN_BLE_MODE,
+}connectionMode_t;
 extern connectionContexts_t gConnectionContext;
 extern masterRoleContextType masterContext;
 
