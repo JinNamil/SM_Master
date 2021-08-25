@@ -344,8 +344,8 @@ void aci_gap_pairing_complete_event(uint16_t Connection_Handle,
   Master_Library_gap_pairing_complete_event(Connection_Handle,
                                             Status, 
                                             Reason);
-  if(Status == 0x02)
-    Master_CloseConnection(Connection_Handle);
+//  if(Status == 0x02)
+//    Master_CloseConnection(Connection_Handle);  //if pairing fail, disconnect
 }
 
 /*******************************************************************************

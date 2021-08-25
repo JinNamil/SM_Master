@@ -283,7 +283,7 @@ int main(void)
   SdkEvalComUartInit(UART_BAUDRATE);
   
   DMA_Config();
-  SetBleUpdateTimeout(10);
+  SetBleUpdateTimeout(4);
   SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
   
   /* BlueNRG-1 stack init */

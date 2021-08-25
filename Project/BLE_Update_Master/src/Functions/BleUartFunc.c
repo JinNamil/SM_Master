@@ -196,10 +196,10 @@ void PcToUartParse(void)
           }
           else if(cmd == OTA_COMMAND_BLE_FLAG_UPDATE)
           {
+            gStartUpdateClock = Clock_Time();
             memcpy(gUpdateBlockData, gBufferUart, BLE_CMD_SIZE); 
             SetBleStatus(STATUS_PC_REQUEST_BLE_START_RECV);
             setUpdatePacketSize(BLE_CMD_SIZE);
-            SetConnUpdateMode(CONN_BLE_MODE);
           }
           else if(cmd == OTA_COMMAND_SET_BLE_UPDATE_MODE)
           {

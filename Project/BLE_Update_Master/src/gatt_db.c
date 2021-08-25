@@ -54,6 +54,7 @@ uint8_t NEW_IMAGE_CHAR_UUID[]                = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x
 uint8_t NEW_IMAGE_TU_CONTENT_CHAR_UUID[]     = {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x08,0x85,0x80,0xaa,0x91,0x26};
 uint8_t EXPECTED_IMAGE_TU_CONTENT_CHAR_UUID[]= {0x66,0x9a,0x0c,0x20,0x00,0x08,0xa7,0xba,0xe3,0x11,0x08,0x85,0x60,0x57,0xdc,0x2b};
 
+extern uint32_t gStartUpdateClock;
 extern uint8_t getUpdatePacketSize(void);
 masterRoleContextType masterContext;
 securitySetType sec_param;
@@ -531,12 +532,12 @@ uint8_t gExpFlag = 0x01;
 void bleWriteTask(void)
 {
   if((GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV) || (GetBleStatus() == STATUS_PC_REQUEST_COMMAND_RECV) 
-     || (GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV))
+     || (GetBleStatus() == STATUS_PC_REQUEST_BANK_SWAP_RECV) || (GetBleStatus() == STATUS_PC_REQUEST_BLE_START_RECV))
   {
 //    DMA_CH_UART_RX->CCR_b.EN = RESET;
     
     if(GetConnUpdateMode() != CONN_BLE_MODE)
-      SetOtaUpdateHandle(masterContext.mainHandle+1);
+      SetOtaUpdateHandle(masterContext.mainHandle);
     
     if (Master_WriteWithoutResponse_Value(masterContext.connHandle, GetOtaUpdateHandle(), getUpdatePacketSize(), gUpdateBlockData) 
         != BLE_STATUS_SUCCESS)
@@ -653,6 +654,7 @@ void Master_PeerDataExchange_CB(uint8_t *procedure, uint8_t *status, uint16_t *c
         }
         else if((data->data_length == 1) && (data->data_value[0] == OTA_COMMAND_BLE_FLAG_UPDATE))
         {
+            gStartUpdateClock = 0;
             UartWrite(data->data_value, data->data_length);
             SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
         }
