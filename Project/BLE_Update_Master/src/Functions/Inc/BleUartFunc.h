@@ -60,6 +60,7 @@ typedef enum
         STATUS_PC_REQUEST_BANK_SWAP_RECV,
         STATUS_PC_REQUEST_BANK_SWAP_COMPLETE,
         STATUS_BLE_SEND_COMMAND_COMPLETE,
+        STATUS_PC_REQUEST_BLE_START_RECV,
 }bleStatus_t;
 
 /************************************ Define Functions ************************************/

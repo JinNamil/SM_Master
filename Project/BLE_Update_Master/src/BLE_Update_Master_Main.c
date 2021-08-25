@@ -304,7 +304,6 @@ int main(void)
   }
   
   SysTick_Config(SYST_CLOCK);
-  SetConnUpdateMode(CONN_BLE_MODE);
   /* Main loop */
   while(1) {
     /* BLE Stack Tick */
