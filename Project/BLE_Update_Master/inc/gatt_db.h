@@ -18,6 +18,7 @@
 #define OTA_COMMAND_ACK				0xAA
 #define OTA_COMMAND_NACK			0xBB
 #define OTA_COMMAND_DISCOVERY			0xCC
+#define OTA_COMMAND_DISCOVERY_STOP	        0xDD
 /* Master context */
 typedef struct masterRoleContextS {
   uint8_t startDeviceDisc;

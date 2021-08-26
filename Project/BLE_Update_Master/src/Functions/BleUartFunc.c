@@ -178,6 +178,23 @@ void PcToUartParse(void)
             else
               putchar(OTA_COMMAND_ACK);
           }
+          else if(cmd == OTA_COMMAND_DISCOVERY_STOP)
+          {
+            if(!gConnectionContext.isBleConnection)
+            {
+              if (Master_TerminateDiscovery() != BLE_STATUS_SUCCESS)
+                putchar(OTA_COMMAND_NACK);
+              else
+                putchar(OTA_COMMAND_DISCOVERY_STOP);
+            }
+            else
+            {
+              if(Master_TerminateGAPConnectionProcedure() != BLE_STATUS_SUCCESS)
+                putchar(OTA_COMMAND_NACK);
+              else
+                putchar(OTA_COMMAND_DISCOVERY_STOP);
+            }
+          }
           else if(cmd == OTA_COMMAND_COMPLETE_BANK_SWAP)
           {
               gStartUpdateClock = 0;
@@ -276,8 +293,6 @@ void PcToUartParse(void)
           {
             SetIsUpdateLastPacket(TRUE);
             setUpdateMode(FALSE);
-//            if(GetConnUpdateMode() == CONN_BLE_MODE)
-//              Master_CloseConnection(masterContext.connHandle);
           }
           
           memcpy(gUpdateBlockData, gBufferUart, BLE_TX_BUFFER_SIZE);

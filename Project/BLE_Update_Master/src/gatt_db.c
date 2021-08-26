@@ -574,7 +574,7 @@ void bleWriteTask(void)
         SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
       }
       else if(GetBleStatus() == STATUS_PC_REQUEST_BLE_START_RECV)
-          SetBleStatus(STATUS_BLE_SEND_COMMAND_COMPLETE);
+          SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
     }
 //    DMA_CH_UART_RX->CCR_b.EN = SET;
   }

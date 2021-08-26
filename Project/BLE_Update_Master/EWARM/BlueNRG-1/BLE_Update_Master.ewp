@@ -1199,6 +1199,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\Library\cryptolib\libcrypto.a</name>
+            <excluded>
+                <configuration>Release</configuration>
+            </excluded>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\Library\Bluetooth_LE\src\stack_user_cfg.c</name>
