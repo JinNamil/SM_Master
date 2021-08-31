@@ -229,6 +229,7 @@
                     <state>LS_SOURCE=LS_SOURCE_EXTERNAL_32KHZ</state>
                     <state>SMPS_INDUCTOR=SMPS_INDUCTOR_10uH</state>
                     <state>BLE_STACK_CONFIGURATION=BLE_STACK_FULL_CONFIGURATION</state>
+                    <state>MANHOLE_NOT_OTA=1</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -660,7 +661,7 @@
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
@@ -1199,9 +1200,6 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\Library\cryptolib\libcrypto.a</name>
-            <excluded>
-                <configuration>Release</configuration>
-            </excluded>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\Library\Bluetooth_LE\src\stack_user_cfg.c</name>

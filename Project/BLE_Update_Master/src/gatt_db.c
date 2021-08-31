@@ -541,7 +541,10 @@ void bleWriteTask(void)
     
     if (Master_WriteWithoutResponse_Value(masterContext.connHandle, GetOtaUpdateHandle(), getUpdatePacketSize(), gUpdateBlockData) 
         != BLE_STATUS_SUCCESS)
+    {
       putchar(OTA_COMMAND_NACK);
+      SetBleStatus(STATUS_PC_REQUEST_COMMAND_WAIT);
+    }
     else
     {      
       if(GetBleStatus() == STATUS_PC_REQUEST_DATA_RECV)
